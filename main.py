@@ -89,10 +89,22 @@ async def chat(data: ChatRequest):
                 json=payload
             )
 
-        if response.status_code != 200:
+                if response.status_code != 200:
+            try:
+                error_data = response.json()
+                error_message = error_data.get("error", {}).get(
+                    "message", "Unknown Groq error"
+                )
+            except ValueError:
+                error_message = "Unable to read Groq error"
+
             raise HTTPException(
                 status_code=502,
-                detail="AI provider request failed"
+                detail=f"Groq error {response.status_code}: {error_message[:300]}"
+            )
+            
+                
+        
             )
 
         result = response.json()

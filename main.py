@@ -165,7 +165,7 @@ async def analyze_image(
             }
         ],
         "temperature": 0.5,
-        "max_completion_tokens": 1500
+        "max_completion_tokens": 700
     }
 
     try:

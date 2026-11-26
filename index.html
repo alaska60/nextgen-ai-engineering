@@ -3,84 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXTGEN AI ENGINEERING</title>
+<title>NEXTGEN AI CREATOR</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
-header{padding:55px 20px;text-align:center;background:linear-gradient(135deg,#101d40,#164e83)}
-h1{font-size:34px;margin:0;color:#60d5ff}
-header p{font-size:17px;color:#dbeafe}
-section{max-width:950px;margin:35px auto;padding:20px}
-h2{color:#60d5ff}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
-.card{background:#17233d;padding:22px;border-radius:12px;border:1px solid #29466d}
-.card h3{color:#60d5ff}
-.card p{color:#d1d5db;line-height:1.6}
-button{background:#168bd0;color:white;border:0;padding:13px 20px;border-radius:8px;font-weight:bold}
-button:active{opacity:.7}
-footer{text-align:center;padding:25px;color:#9ca3af;background:#080d19}
-.notice{background:#17233d;padding:18px;border-left:4px solid #60d5ff;line-height:1.6}
+body {
+  margin: 0;
+  padding: 20px;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+h1 { color: #38d9ff; }
+.box {
+  background: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+textarea, input, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+}
+button {
+  background: #08a6d9;
+  color: white;
+  font-weight: bold;
+}
+#result {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 </style>
 </head>
 <body>
 
-<header>
-<h1>NEXTGEN AI ENGINEERING</h1>
-<p>Smart Digital Support. Organized Business Solutions.</p>
-<p>AI-Assisted Business Services</p>
-</header>
+<h1>🚀 NEXTGEN AI CREATOR</h1>
+<p>Your AI Engineering Assistant</p>
 
-<section>
-<h2>Welcome</h2>
-<p>We provide AI-assisted digital support services designed to help businesses communicate clearly, organize information, and prepare professional content.</p>
-</section>
+<div class="box">
+<h2>🤖 AI Chat</h2>
+<textarea id="message" placeholder="Ask NEXTGEN AI..."></textarea>
+<button onclick="sendChat()">Send Message</button>
+</div>
 
-<section>
-<h2>Our Services</h2>
-<div class="grid">
-<div class="card">
-<h3>01. Customer Support Replies</h3>
-<p>Clear, friendly, and professional customer service response drafts.</p>
+<div class="box">
+<h2>🖼️ AI Image Analysis</h2>
+<input type="file" id="image" accept="image/*">
+<textarea id="prompt">Describe and analyze this image.</textarea>
+<button onclick="analyzeImage()">Analyze Image</button>
 </div>
-<div class="card">
-<h3>02. Email Responses</h3>
-<p>Professional email drafts for customer inquiries and business communication.</p>
-</div>
-<div class="card">
-<h3>03. Product Descriptions</h3>
-<p>Engaging product descriptions based on the information provided by clients.</p>
-</div>
-<div class="card">
-<h3>04. Data Organization</h3>
-<p>Organizing information into clear, structured tables and spreadsheets.</p>
-</div>
-<div class="card">
-<h3>05. Client Reports</h3>
-<p>Well-organized reports and summaries using client-provided information.</p>
-</div>
-</div>
-</section>
 
-<section>
-<h2>Our Work Process</h2>
-<div class="notice">
-1. Receive the client's instructions.<br>
-2. Prepare an AI-assisted draft.<br>
-3. Review and quality-check the work.<br>
-4. Obtain human approval before delivery.
+<div class="box">
+<h2>📁 AI Response</h2>
+<div id="result">Welcome to NEXTGEN AI CREATOR!</div>
 </div>
-</section>
 
-<section>
-<h2>Important Information</h2>
-<p>Services are prepared according to client requirements. AI-assisted drafts are reviewed by a human before delivery. No automatic results or guaranteed outcomes are promised.</p>
-</section>
+<script>
+const API = "https://nextgen-ai-engineering.onrender.com";
 
-<footer>
-<p>NEXTGEN AI ENGINEERING</p>
-<p>Professional Digital Support Services</p>
-<p>© 2026 NEXTGEN AI ENGINEERING</p>
-</footer>
+async function sendChat() {
+  const message = document.getElementById("message").value;
+  const result = document.getElementById("result");
+
+  if (!message.trim()) {
+    result.textContent = "Please enter a message.";
+    return;
+  }
+
+  result.textContent = "AI is thinking...";
+
+  try {
+    const response = await fetch(API + "/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message})
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(JSON.stringify(data));
+
+    result.textContent = data.reply || JSON.stringify(data);
+  } catch (error) {
+    result.textContent = "Error: " + error.message;
+  }
+}
+
+async function analyzeImage() {
+  const file = document.getElementById("image").files[0];
+  const prompt = document.getElementById("prompt").value;
+  const result = document.getElementById("result");
+
+  if (!file) {
+    result.textContent = "Please choose an image first.";
+    return;
+  }
+
+  result.textContent = "Analyzing image...";
+
+  const form = new FormData();
+  form.append("image", file);
+  form.append("prompt", prompt);
+
+  try {
+    const response = await fetch(API + "/api/analyze-image", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(JSON.stringify(data));
+
+    result.textContent = data.reply || JSON.stringify(data);
+  } catch (error) {
+    result.textContent = "Error: " + error.message;
+  }
+}
+</script>
 
 </body>
 </html>

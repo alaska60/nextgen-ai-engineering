@@ -39,7 +39,7 @@ button {
   cursor: pointer;
 }
 button:disabled { opacity: 0.6; }
-#result, #pluginResult {
+#result, #pluginResult, #smartResult {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -63,17 +63,37 @@ button:disabled { opacity: 0.6; }
 <input type="file" id="document"
 accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
+</div><!-- SMART ANALYSIS --><div class="box">
+<h2>🧠 NEXTGEN SMART ANALYSIS</h2>
+<p>Test your project concept, identify problems and discover improvements.</p><label>Project Name:</label>
+<input id="projectName" placeholder="Example: BLOCK WORLD SURVIVAL">
+
+<label>Project Type:</label>
+<select id="projectType">
+
+<option value="Video Game">Video Game</option>
+<option value="Mobile App">Mobile App</option>
+<option value="Website">Website</option>
+<option value="Software">Software</option>
+<option value="Creative Project">Creative Project</option>
+<option value="Other">Other</option>
+</select><label>Project Description:</label>
+
+<textarea id="projectDescription"
+placeholder="Describe your project and its features..."></textarea><button id="smartButton" onclick="runSmartAnalysis()">
+🚀 Analyze Project
+</button><p class="status" id="smartStatus">Ready for project analysis.</p><h3>📊 Smart Analysis Results</h3>
+<div id="smartResult">Your project analysis will appear here.</div>
 </div><div class="box">
 <h2>🧩 NEXTGEN Plugins</h2>
-<p>Choose a plugin and enter your input.</p>
-<label for="plugin">Select Plugin:</label>
+<p>Choose a plugin and enter your input.</p><label for="plugin">Select Plugin:</label>
 <select id="plugin">
+
 <option value="calculator">Calculator</option>
 <option value="text_analyzer">Text Analyzer</option>
 <option value="json_formatter">JSON Formatter</option>
-</select>
-<textarea id="pluginInput" placeholder="Enter your input..."></textarea>
-<button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
+</select><textarea id="pluginInput" placeholder="Enter your input..."></textarea><button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
+
 <p class="status" id="pluginStatus">Loading plugins...</p>
 <h3>Plugin Result</h3>
 <div id="pluginResult">Your plugin result will appear here.</div>
@@ -83,6 +103,7 @@ accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 </div><script>
 const API = "https://nextgen-ai-engineering.onrender.com";
 
+// AI CHAT
 async function sendChat() {
   const message = document.getElementById("message").value;
   const result = document.getElementById("result");
@@ -109,6 +130,7 @@ async function sendChat() {
   }
 }
 
+// IMAGE ANALYSIS
 async function analyzeImage() {
   const file = document.getElementById("image").files[0];
   const prompt = document.getElementById("prompt").value;
@@ -139,6 +161,7 @@ async function analyzeImage() {
   }
 }
 
+// FILE ANALYSIS
 async function analyzeFile() {
   const file = document.getElementById("document").files[0];
   const result = document.getElementById("result");
@@ -172,12 +195,61 @@ async function analyzeFile() {
   }
 }
 
+// SMART ANALYSIS
+async function runSmartAnalysis() {
+  const project_name = document.getElementById("projectName").value.trim();
+  const project_type = document.getElementById("projectType").value;
+  const description = document.getElementById("projectDescription").value.trim();
+
+  const output = document.getElementById("smartResult");
+  const status = document.getElementById("smartStatus");
+  const button = document.getElementById("smartButton");
+
+  if (!project_name || !description) {
+    output.textContent = "Please enter your project name and description.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "NEXTGEN AI is analyzing your project...";
+  output.textContent = "Please wait. Smart Analysis is running...";
+
+  try {
+    const response = await fetch(API + "/api/smart-analysis", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        project_name,
+        project_type,
+        description
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    output.textContent = data.analysis || "No analysis received.";
+    status.textContent = "✅ Analysis completed successfully!";
+
+  } catch (error) {
+    output.textContent = "Smart Analysis error: " + error.message;
+    status.textContent = "Analysis failed. Please try again.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// LOAD PLUGINS
 async function loadPlugins() {
   const status = document.getElementById("pluginStatus");
 
   try {
     const response = await fetch(API + "/api/plugins");
     const data = await response.json();
+
     if (!response.ok) throw new Error("Could not load plugins.");
 
     const select = document.getElementById("plugin");
@@ -196,6 +268,7 @@ async function loadPlugins() {
   }
 }
 
+// RUN PLUGIN
 async function runPlugin() {
   const plugin = document.getElementById("plugin").value;
   const input = document.getElementById("pluginInput").value;
@@ -228,9 +301,10 @@ async function runPlugin() {
   }
 }
 
+// INITIALIZE
 loadPlugins();
 
-// Register the service worker
+// SERVICE WORKER
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {

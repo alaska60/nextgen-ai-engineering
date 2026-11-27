@@ -1,236 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
-<meta name="description" content="Your AI Engineering Assistant">
+<meta name="description" content="NEXTGEN AI CREATOR">
 <link rel="manifest" href="./manifest.json">
-<title>NEXTGEN AI CREATOR</title>
-
-<style>
-body{
- margin:0;padding:20px;background:#101827;color:white;
- font-family:Arial,sans-serif
-}
+<title>NEXTGEN AI CREATOR</title><style>
+body{margin:0;padding:16px;background:#101827;color:white;font-family:Arial,sans-serif}
 h1{color:#38d9ff}
-.box{
- background:#1e293b;padding:16px;border-radius:12px;
- margin-bottom:15px
-}
-textarea,input,select,button{
- width:100%;box-sizing:border-box;padding:12px;
- margin-top:10px;border-radius:8px;border:none
-}
+.box{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:15px}
+textarea,input,select,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;border-radius:8px;border:none}
 textarea{min-height:90px;resize:vertical}
-button{
- background:#08a6d9;color:white;font-weight:bold;
- cursor:pointer
-}
+button{background:#08a6d9;color:white;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.6}
-#result,#pluginResult,#smartResult,#plannerResult{
- white-space:pre-wrap;overflow-wrap:anywhere
-}
-.status{color:#38d9ff;font-size:14px}
 .secondary{background:#475569}
-.game-screen{
- background:#111827;border-radius:10px;padding:8px
-}
-#gameCanvas{
- width:100%;display:block;background:#87ceeb;
- border-radius:6px;image-rendering:pixelated;
- touch-action:none
-}
-.game-controls{
- display:grid;grid-template-columns:repeat(4,1fr);gap:7px
-}
-.game-controls button{
- padding:16px 4px;font-size:17px;touch-action:none
-}
+.menu-button{font-size:19px;padding:17px;margin-top:12px}
+.status{color:#38d9ff;font-size:14px}
+#result,#pluginResult,#smartResult,#plannerResult{white-space:pre-wrap;overflow-wrap:anywhere}
+.game-screen{background:#111827;border-radius:10px;padding:8px}
+#gameCanvas{width:100%;display:block;background:#87ceeb;border-radius:6px;image-rendering:pixelated;touch-action:none}
+.game-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.game-controls button{padding:16px 4px;font-size:16px;touch-action:none}
 .game-info{font-size:13px;color:#cbd5e1}
-</style>
-</head>
+.hidden{display:none}
+</style></head><body><h1>🚀 NEXTGEN AI CREATOR</h1>
+<p>Your AI Engineering Assistant</p><!-- BLOCK WORLD SURVIVAL MAIN MENU --><div class="box" id="mainMenu">
+<h2>🌍 BLOCK WORLD SURVIVAL</h2>
+<p>Welcome to your block world adventure!</p><button class="menu-button" onclick="openPlay()">▶️ Play</button>
+<button class="menu-button" onclick="showScreen('createScreen')">🌍 Create World</button>
+<button class="menu-button" onclick="showScreen('serversScreen')">🌐 Servers</button>
+<button class="menu-button" onclick="showScreen('friendsScreen')">👥 Friends</button>
+<button class="menu-button" onclick="showScreen('settingsScreen')">⚙️ Settings</button>
 
-<body>
+</div><!-- CREATE WORLD --><div class="box hidden" id="createScreen">
+<h2>🌍 Create World</h2><label>World Name:</label>
+<input id="newWorldName" value="My Survival World">
 
-<h1>🚀 NEXTGEN AI CREATOR</h1>
-<p>Your AI Engineering Assistant</p>
+<label>World Type:</label>
+<select id="newWorldType">
 
-<div class="box">
+<option value="grass">🌳 Green Grass World</option>
+<option value="desert">🏜️ Desert World</option>
+<option value="snow">❄️ Snow World</option>
+</select><button onclick="createNewWorld()">🌍 Create and Play</button>
+<button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
+
+<p class="status" id="createStatus">Choose your world settings.</p>
+</div><!-- SERVERS --><div class="box hidden" id="serversScreen">
+<h2>🌐 Servers</h2>
+<p>Online multiplayer servers are planned for a future update.</p>
+<p class="status">Current status: Offline prototype. No server connection yet.</p>
+<button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
+</div><!-- FRIENDS --><div class="box hidden" id="friendsScreen">
+<h2>👥 Friends</h2>
+<p>Play with friends will be added in a future multiplayer update.</p>
+<p class="status">Current status: Friends system not connected yet.</p>
+<button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
+</div><!-- SETTINGS --><div class="box hidden" id="settingsScreen">
+<h2>⚙️ Settings</h2><label>Graphics Quality (prototype setting):</label>
+<select id="graphicsSetting">
+
+<option>Low</option>
+<option selected>Medium</option>
+<option>High</option>
+</select><label>Frame Rate Preference:</label>
+<select id="fpsSetting">
+
+<option>30 FPS</option>
+<option>60 FPS</option>
+</select><p class="status">These are preview settings. They do not yet change the game's graphics engine.</p>
+<button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
+</div><!-- AI CHAT --><div class="box">
 <h2>🤖 AI Chat</h2>
 <textarea id="message" placeholder="Ask NEXTGEN AI..."></textarea>
 <button onclick="sendChat()">Send Message</button>
-</div>
-
-<div class="box">
+</div><!-- IMAGE ANALYSIS --><div class="box">
 <h2>🖼️ AI Image Analysis</h2>
 <input type="file" id="image" accept="image/*">
 <textarea id="prompt">Describe and analyze this image.</textarea>
 <button onclick="analyzeImage()">Analyze Image</button>
-</div>
-
-<div class="box">
+</div><!-- FILE ANALYSIS --><div class="box">
 <h2>📁 AI File Analysis</h2>
 <p>Upload PDF, DOCX, XLSX, TXT, PPTX or CSV files.</p>
 <input type="file" id="document" accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
-</div>
-
-<div class="box">
-<h2>📋 NEXTGEN PROJECT PLANNER</h2>
-<p>Plan your game, app, website or creative project with AI.</p>
-
-<label>Project Name:</label>
+</div><!-- PROJECT PLANNER --><div class="box">
+<h2>📋 NEXTGEN PROJECT PLANNER</h2><label>Project Name:</label>
 <input id="plannerName" placeholder="Example: BLOCK WORLD SURVIVAL">
 
 <label>Project Type:</label>
 <select id="plannerType">
+
 <option>Video Game</option>
 <option>Mobile App</option>
 <option>Website</option>
 <option>Software</option>
 <option>Creative Project</option>
 <option>Other</option>
-</select>
+</select><label>Project Goal:</label>
 
-<label>Project Goal:</label>
-<textarea id="plannerGoal" placeholder="What do you want to create?"></textarea>
+<textarea id="plannerGoal" placeholder="What do you want to create?"></textarea><label>Important Features:</label>
 
-<label>Important Features:</label>
-<textarea id="plannerFeatures" placeholder="List the features you want..."></textarea>
+<textarea id="plannerFeatures" placeholder="List the features you want..."></textarea><button id="plannerButton" onclick="generateProjectPlan()">🧠 Generate AI Project Plan</button>
 
-<button id="plannerButton" onclick="generateProjectPlan()">🧠 Generate AI Project Plan</button>
-<p class="status" id="plannerStatus">Ready to plan your project.</p>
-
-<h3>📝 Your Project Plan</h3>
-<div id="plannerResult">Your project plan will appear here.</div>
-
-<button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
+<p class="status" id="plannerStatus">Ready to plan your project.</p><h3>📝 Your Project Plan</h3>
+<div id="plannerResult">Your project plan will appear here.</div><button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
 <button class="secondary" onclick="loadProjectPlan()">📂 Load Saved Project Plan</button>
-</div>
 
-<!-- GAME MAKER -->
-<div class="box">
+</div><!-- GAME MAKER --><div class="box" id="gameMaker">
 <h2>🎮 NEXTGEN GAME MAKER</h2>
-<p>Create and play your first block-world game prototype.</p>
-
-<label>Game Name:</label>
+<p>Create and play your block-world game prototype.</p><label>Game Name:</label>
 <input id="gameName" value="BLOCK WORLD SURVIVAL">
 
 <label>World Type:</label>
 <select id="worldType">
+
 <option value="grass">🌳 Green Grass World</option>
 <option value="desert">🏜️ Desert World</option>
 <option value="snow">❄️ Snow World</option>
-</select>
+</select><button onclick="startGame()">▶️ Start Game</button>
 
-<button onclick="startGame()">▶️ Start Game</button>
-<p class="status" id="gameStatus">Ready to start your game.</p>
-
-<div class="game-screen">
-<canvas id="gameCanvas" width="640" height="360"></canvas>
-
-<p class="game-info">
-Move: Left / Right | Jump: Jump button |
-Break: Break Block | Place: Place Block
-</p>
-
-<div class="game-controls">
+<p class="status" id="gameStatus">Ready to start your game.</p><div class="game-screen">
+<canvas id="gameCanvas" width="640" height="360"></canvas><p class="game-info">Move: Left / Right | Jump: Jump button | Break: Break Block | Place: Place Block</p><div class="game-controls">
 <button id="leftBtn">⬅️ Left</button>
 <button id="rightBtn">➡️ Right</button>
 <button id="jumpBtn">⬆️ Jump</button>
 <button onclick="breakBlock()">⛏️ Break</button>
-</div>
-
-<button onclick="placeBlock()">🧱 Place Block</button>
+</div><button onclick="placeBlock()">🧱 Place Block</button>
 <button class="secondary" onclick="resetGame()">🔄 Reset World</button>
 
 <p class="game-info" id="gameMessage">Press Start Game to begin.</p>
-</div>
-
-<p><b>Prototype note:</b> Kini usa pa ka simple 2D block-game prototype. Dili pa kini ang final 3D game.</p>
-</div>
-
-<div class="box">
+</div><p><b>Prototype note:</b> Simple 2D block-game prototype. Dili pa kini ang final 3D game.</p>
+<button class="secondary" onclick="showScreen('mainMenu')">🏠 Main Menu</button>
+</div><!-- SMART ANALYSIS --><div class="box">
 <h2>🧠 NEXTGEN SMART ANALYSIS</h2>
-<p>Test your project concept, identify problems and discover improvements.</p>
-
-<label>Project Name:</label>
+<p>Test your project concept and discover improvements.</p><label>Project Name:</label>
 <input id="projectName" placeholder="Example: BLOCK WORLD SURVIVAL">
 
 <label>Project Type:</label>
 <select id="projectType">
+
 <option value="Video Game">Video Game</option>
 <option value="Mobile App">Mobile App</option>
 <option value="Website">Website</option>
 <option value="Software">Software</option>
 <option value="Creative Project">Creative Project</option>
 <option value="Other">Other</option>
-</select>
+</select><label>Project Description:</label>
 
-<label>Project Description:</label>
-<textarea id="projectDescription" placeholder="Describe your project and its features..."></textarea>
+<textarea id="projectDescription" placeholder="Describe your project and its features..."></textarea><button id="smartButton" onclick="runSmartAnalysis()">🚀 Analyze Project</button>
 
-<button id="smartButton" onclick="runSmartAnalysis()">🚀 Analyze Project</button>
 <p class="status" id="smartStatus">Ready for project analysis.</p>
-
 <h3>📊 Smart Analysis Results</h3>
 <div id="smartResult">Your project analysis will appear here.</div>
-</div>
-
-<div class="box">
-<h2>🧩 NEXTGEN Plugins</h2>
-<p>Choose a plugin and enter your input.</p>
-
-<label for="plugin">Select Plugin:</label>
+</div><!-- PLUGINS --><div class="box">
+<h2>🧩 NEXTGEN Plugins</h2><label>Select Plugin:</label>
 <select id="plugin">
+
 <option value="calculator">Calculator</option>
 <option value="text_analyzer">Text Analyzer</option>
 <option value="json_formatter">JSON Formatter</option>
-</select>
+</select><textarea id="pluginInput" placeholder="Enter your input..."></textarea><button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
 
-<textarea id="pluginInput" placeholder="Enter your input..."></textarea>
-<button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
 <p class="status" id="pluginStatus">Loading plugins...</p>
-
 <h3>Plugin Result</h3>
 <div id="pluginResult">Your plugin result will appear here.</div>
-</div>
-
-<div class="box">
+</div><div class="box">
 <h2>📄 AI Response</h2>
 <div id="result">Welcome to NEXTGEN AI CREATOR!</div>
-</div>
-
-<script>
+</div><script>
 const API="https://nextgen-ai-engineering.onrender.com";
+
+// MENU NAVIGATION
+function showScreen(id){
+ document.querySelectorAll("#createScreen,#serversScreen,#friendsScreen,#settingsScreen,#mainMenu")
+ .forEach(el=>el.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function openPlay(){
+ document.getElementById("gameMaker").scrollIntoView({behavior:"smooth"});
+}
+
+function createNewWorld(){
+ const name=document.getElementById("newWorldName").value.trim();
+ const type=document.getElementById("newWorldType").value;
+
+ if(!name){
+  document.getElementById("createStatus").textContent="Please enter a world name.";
+  return;
+ }
+
+ document.getElementById("gameName").value=name;
+ document.getElementById("worldType").value=type;
+ document.getElementById("createStatus").textContent="World created! Starting your world...";
+ startGame();
+ openPlay();
+}
 
 // AI CHAT
 async function sendChat(){
  const message=document.getElementById("message").value;
  const result=document.getElementById("result");
 
- if(!message.trim()){
-  result.textContent="Please enter a message.";
-  return;
- }
-
+ if(!message.trim()){result.textContent="Please enter a message.";return;}
  result.textContent="AI is thinking...";
 
  try{
   const response=await fetch(API+"/api/chat",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
+   method:"POST",headers:{"Content-Type":"application/json"},
    body:JSON.stringify({message})
   });
-
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   result.textContent=data.reply||JSON.stringify(data);
- }catch(error){
-  result.textContent="Error: "+error.message;
- }
+ }catch(error){result.textContent="Error: "+error.message;}
 }
 
 // IMAGE ANALYSIS
@@ -239,11 +224,7 @@ async function analyzeImage(){
  const prompt=document.getElementById("prompt").value;
  const result=document.getElementById("result");
 
- if(!file){
-  result.textContent="Please choose an image first.";
-  return;
- }
-
+ if(!file){result.textContent="Please choose an image first.";return;}
  result.textContent="Analyzing image...";
 
  const form=new FormData();
@@ -251,17 +232,11 @@ async function analyzeImage(){
  form.append("prompt",prompt);
 
  try{
-  const response=await fetch(API+"/api/analyze-image",{
-   method:"POST",body:form
-  });
-
+  const response=await fetch(API+"/api/analyze-image",{method:"POST",body:form});
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   result.textContent=data.reply||JSON.stringify(data);
- }catch(error){
-  result.textContent="Error: "+error.message;
- }
+ }catch(error){result.textContent="Error: "+error.message;}
 }
 
 // FILE ANALYSIS
@@ -269,33 +244,19 @@ async function analyzeFile(){
  const file=document.getElementById("document").files[0];
  const result=document.getElementById("result");
 
- if(!file){
-  result.textContent="Please choose a file first.";
-  return;
- }
-
- if(file.size>10*1024*1024){
-  result.textContent="File is too large. Maximum size is 10 MB.";
-  return;
- }
+ if(!file){result.textContent="Please choose a file first.";return;}
+ if(file.size>10*1024*1024){result.textContent="Maximum file size is 10 MB.";return;}
 
  result.textContent="Analyzing file... Please wait.";
-
  const form=new FormData();
  form.append("file",file);
 
  try{
-  const response=await fetch(API+"/api/analyze-file",{
-   method:"POST",body:form
-  });
-
+  const response=await fetch(API+"/api/analyze-file",{method:"POST",body:form});
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   result.textContent=data.reply||JSON.stringify(data);
- }catch(error){
-  result.textContent="File analysis error: "+error.message;
- }
+ }catch(error){result.textContent="File analysis error: "+error.message;}
 }
 
 // PROJECT PLANNER
@@ -304,15 +265,11 @@ async function generateProjectPlan(){
  const type=document.getElementById("plannerType").value;
  const goal=document.getElementById("plannerGoal").value.trim();
  const features=document.getElementById("plannerFeatures").value.trim();
-
  const output=document.getElementById("plannerResult");
  const status=document.getElementById("plannerStatus");
  const button=document.getElementById("plannerButton");
 
- if(!name||!goal||!features){
-  output.textContent="Please complete the project name, goal and features.";
-  return;
- }
+ if(!name||!goal||!features){output.textContent="Please complete the project name, goal and features.";return;}
 
  button.disabled=true;
  status.textContent="AI is creating your project plan...";
@@ -327,22 +284,17 @@ Include overview, main features, development phases, free tools, testing plan, r
 
  try{
   const response=await fetch(API+"/api/chat",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
+   method:"POST",headers:{"Content-Type":"application/json"},
    body:JSON.stringify({message})
   });
-
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   output.textContent=data.reply||JSON.stringify(data);
   status.textContent="✅ Project plan generated!";
  }catch(error){
   output.textContent="Planner error: "+error.message;
   status.textContent="Could not generate the plan.";
- }finally{
-  button.disabled=false;
- }
+ }finally{button.disabled=false;}
 }
 
 function saveProjectPlan(){
@@ -350,8 +302,7 @@ function saveProjectPlan(){
  const plan=document.getElementById("plannerResult").textContent;
 
  if(!name||!plan||plan==="Your project plan will appear here."){
-  alert("Please generate a project plan first.");
-  return;
+  alert("Please generate a project plan first.");return;
  }
 
  const saved={
@@ -366,35 +317,22 @@ function saveProjectPlan(){
  try{
   localStorage.setItem("NEXTGEN_PROJECT_PLAN",JSON.stringify(saved));
   document.getElementById("plannerStatus").textContent="✅ Project plan saved on this phone!";
- }catch(error){
-  alert("Could not save: "+error.message);
- }
+ }catch(error){alert("Could not save: "+error.message);}
 }
 
 function loadProjectPlan(){
- const output=document.getElementById("plannerResult");
-
  try{
   const saved=localStorage.getItem("NEXTGEN_PROJECT_PLAN");
-
-  if(!saved){
-   alert("No saved project plan found.");
-   return;
-  }
-
+  if(!saved){alert("No saved project plan found.");return;}
   const data=JSON.parse(saved);
 
   document.getElementById("plannerName").value=data.name||"";
   document.getElementById("plannerType").value=data.type||"Video Game";
   document.getElementById("plannerGoal").value=data.goal||"";
   document.getElementById("plannerFeatures").value=data.features||"";
-
-  output.textContent=data.plan||"";
-  document.getElementById("plannerStatus").textContent=
-   "Loaded saved project plan. Saved: "+(data.savedAt||"Unknown");
- }catch(error){
-  alert("Could not load: "+error.message);
- }
+  document.getElementById("plannerResult").textContent=data.plan||"";
+  document.getElementById("plannerStatus").textContent="Loaded saved plan: "+(data.savedAt||"Unknown");
+ }catch(error){alert("Could not load: "+error.message);}
 }
 
 // SMART ANALYSIS
@@ -402,15 +340,11 @@ async function runSmartAnalysis(){
  const project_name=document.getElementById("projectName").value.trim();
  const project_type=document.getElementById("projectType").value;
  const description=document.getElementById("projectDescription").value.trim();
-
  const output=document.getElementById("smartResult");
  const status=document.getElementById("smartStatus");
  const button=document.getElementById("smartButton");
 
- if(!project_name||!description){
-  output.textContent="Please enter your project name and description.";
-  return;
- }
+ if(!project_name||!description){output.textContent="Please enter project name and description.";return;}
 
  button.disabled=true;
  status.textContent="NEXTGEN AI is analyzing your project...";
@@ -418,48 +352,37 @@ async function runSmartAnalysis(){
 
  try{
   const response=await fetch(API+"/api/smart-analysis",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
+   method:"POST",headers:{"Content-Type":"application/json"},
    body:JSON.stringify({project_name,project_type,description})
   });
-
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   output.textContent=data.analysis||"No analysis received.";
   status.textContent="✅ Analysis completed successfully!";
  }catch(error){
   output.textContent="Smart Analysis error: "+error.message;
   status.textContent="Analysis failed. Please try again.";
- }finally{
-  button.disabled=false;
- }
+ }finally{button.disabled=false;}
 }
 
 // PLUGINS
 async function loadPlugins(){
  const status=document.getElementById("pluginStatus");
-
  try{
   const response=await fetch(API+"/api/plugins");
   const data=await response.json();
-
   if(!response.ok)throw new Error("Could not load plugins.");
 
   const select=document.getElementById("plugin");
   select.innerHTML="";
-
   data.plugins.forEach(item=>{
    const option=document.createElement("option");
    option.value=item.id;
    option.textContent=item.name;
    select.appendChild(option);
   });
-
   status.textContent=data.plugins.length+" plugins available.";
- }catch(error){
-  status.textContent="Plugin loading error: "+error.message;
- }
+ }catch(error){status.textContent="Plugin loading error: "+error.message;}
 }
 
 async function runPlugin(){
@@ -468,75 +391,45 @@ async function runPlugin(){
  const output=document.getElementById("pluginResult");
  const button=document.getElementById("runPluginButton");
 
- if(!input.trim()){
-  output.textContent="Please enter some input first.";
-  return;
- }
-
+ if(!input.trim()){output.textContent="Please enter some input first.";return;}
  button.disabled=true;
  output.textContent="Running plugin...";
 
  try{
   const response=await fetch(API+"/api/plugins/run",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
+   method:"POST",headers:{"Content-Type":"application/json"},
    body:JSON.stringify({plugin,input})
   });
-
   const data=await response.json();
   if(!response.ok)throw new Error(JSON.stringify(data));
-
   output.textContent=JSON.stringify(data,null,2);
- }catch(error){
-  output.textContent="Plugin error: "+error.message;
- }finally{
-  button.disabled=false;
- }
+ }catch(error){output.textContent="Plugin error: "+error.message;}
+ finally{button.disabled=false;}
 }
 
-// IMPROVED BLOCK WORLD SURVIVAL GAME
+// BLOCK WORLD SURVIVAL GAME
 const canvas=document.getElementById("gameCanvas");
 const ctx=canvas.getContext("2d");
-
-const TILE=32;
-const COLS=20;
-const ROWS=11;
-
+const TILE=32,COLS=20,ROWS=11;
 let world=[];
-let player={
- x:96,y:150,vx:0,vy:0,
- w:22,h:28,onGround:false,
- facing:1,walking:false
-};
-
-let running=false;
-let worldTheme="grass";
+let player={x:96,y:150,vx:0,vy:0,w:22,h:28,onGround:false,facing:1,walking:false};
+let running=false,worldTheme="grass";
 let keys={left:false,right:false};
-let gameLoop=null;
-let animationFrame=0;
+let gameLoop=null,animationFrame=0;
 
 function createWorld(){
  world=[];
-
  for(let y=0;y<ROWS;y++){
   world[y]=[];
-
   for(let x=0;x<COLS;x++){
    world[y][x]=y>=8?(y===8?"grass":"dirt"):null;
   }
  }
-
  world[7][7]="grass";
  world[6][7]="dirt";
  world[7][12]="grass";
  world[7][13]="grass";
-
- player={
-  x:96,y:150,vx:0,vy:0,
-  w:22,h:28,onGround:false,
-  facing:1,walking:false
- };
-
+ player={x:96,y:150,vx:0,vy:0,w:22,h:28,onGround:false,facing:1,walking:false};
  animationFrame=0;
 }
 
@@ -544,29 +437,17 @@ function startGame(){
  worldTheme=document.getElementById("worldType").value;
  createWorld();
  running=true;
-
  document.getElementById("gameStatus").textContent="🎮 Game started!";
  document.getElementById("gameMessage").textContent="Explore your block world!";
-
  if(gameLoop)cancelAnimationFrame(gameLoop);
  gameLoop=requestAnimationFrame(updateGame);
 }
 
-function resetGame(){
- startGame();
-}
+function resetGame(){startGame();}
 
 function tileColor(type){
- if(type==="grass"){
-  return worldTheme==="desert"?"#d6b65c":
-   worldTheme==="snow"?"#eaf5ff":"#43a047";
- }
-
- if(type==="dirt"){
-  return worldTheme==="desert"?"#a8783e":
-   worldTheme==="snow"?"#b8c8d8":"#795548";
- }
-
+ if(type==="grass")return worldTheme==="desert"?"#d6b65c":worldTheme==="snow"?"#eaf5ff":"#43a047";
+ if(type==="dirt")return worldTheme==="desert"?"#a8783e":worldTheme==="snow"?"#b8c8d8":"#795548";
  return "#777";
 }
 
@@ -581,43 +462,27 @@ function collides(x,y){
  const right=Math.floor((x+player.w-1)/TILE);
  const top=Math.floor(y/TILE);
  const bottom=Math.floor((y+player.h-1)/TILE);
-
  for(let ty=top;ty<=bottom;ty++){
   for(let tx=left;tx<=right;tx++){
    if(isSolid(tx,ty))return true;
   }
  }
-
  return false;
 }
 
 function updateGame(){
  if(!running)return;
-
  const speed=3;
  player.vx=0;
-
- if(keys.left){
-  player.vx=-speed;
-  player.facing=-1;
- }
-
- if(keys.right){
-  player.vx=speed;
-  player.facing=1;
- }
-
+ if(keys.left){player.vx=-speed;player.facing=-1;}
+ if(keys.right){player.vx=speed;player.facing=1;}
  player.walking=player.vx!==0;
 
  let nextX=player.x+player.vx;
-
- if(!collides(nextX,player.y)){
-  player.x=nextX;
- }
+ if(!collides(nextX,player.y))player.x=nextX;
 
  player.vy+=0.5;
  if(player.vy>9)player.vy=9;
-
  let nextY=player.y+player.vy;
 
  if(!collides(player.x,nextY)){
@@ -628,34 +493,20 @@ function updateGame(){
    player.y=Math.floor((player.y+player.h)/TILE)*TILE-player.h;
    player.onGround=true;
   }
-
   player.vy=0;
  }
 
- if(player.y>ROWS*TILE){
-  player.x=96;
-  player.y=150;
-  player.vy=0;
- }
-
+ if(player.y>ROWS*TILE){player.x=96;player.y=150;player.vy=0;}
  if(player.walking)animationFrame+=0.2;
-
  drawGame();
  gameLoop=requestAnimationFrame(updateGame);
 }
 
 function drawGame(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
-
  const sky=ctx.createLinearGradient(0,0,0,canvas.height);
-
- sky.addColorStop(0,
-  worldTheme==="snow"?"#b9d9f5":
-  worldTheme==="desert"?"#f2c879":"#75c9f2"
- );
-
+ sky.addColorStop(0,worldTheme==="snow"?"#b9d9f5":worldTheme==="desert"?"#f2c879":"#75c9f2");
  sky.addColorStop(1,"#e5f5ff");
-
  ctx.fillStyle=sky;
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -668,59 +519,43 @@ function drawGame(){
   for(let x=0;x<COLS;x++){
    const block=world[y][x];
    if(!block)continue;
-
-   const sx=x*TILE;
-   const sy=y*TILE;
-
+   const sx=x*TILE,sy=y*TILE;
    ctx.fillStyle=tileColor(block);
    ctx.fillRect(sx,sy,TILE,TILE);
-
    ctx.strokeStyle="rgba(0,0,0,.2)";
    ctx.strokeRect(sx,sy,TILE,TILE);
-
    if(block==="grass"){
     ctx.fillStyle="#80d66b";
     ctx.fillRect(sx,sy,TILE,5);
    }
   }
  }
-
  drawPlayer();
-
  ctx.fillStyle="white";
  ctx.font="14px Arial";
  ctx.fillText("BLOCK WORLD SURVIVAL",12,22);
 }
 
 function drawPlayer(){
- const px=player.x;
- const py=player.y;
+ const px=player.x,py=player.y;
  const swing=player.walking?Math.sin(animationFrame)*3:0;
-
  ctx.save();
-
  if(player.facing===-1){
   ctx.translate(px*2+player.w,0);
   ctx.scale(-1,1);
   ctx.translate(-px,0);
  }
-
  ctx.fillStyle="#111827";
  ctx.fillRect(px+2,py+24+swing,7,5);
  ctx.fillRect(px+14,py+24-swing,7,5);
-
  ctx.fillStyle="#2563eb";
  ctx.fillRect(px,py+10,player.w,15);
-
  ctx.fillStyle="#f2c9a0";
  ctx.fillRect(px+3,py,16,13);
-
  ctx.fillStyle="#593b25";
  ctx.fillRect(px+3,py,16,4);
-
  ctx.fillStyle="#222";
  ctx.fillRect(px+13,py+5,3,3);
-
  ctx.restore();
 }
 
@@ -732,89 +567,62 @@ function jump(){
 }
 
 function targetBlock(){
- const tx=Math.floor(
-  (player.x+(player.facing===1?player.w+8:-8))/TILE
- );
-
+ const tx=Math.floor((player.x+(player.facing===1?player.w+8:-8))/TILE);
  const ty=Math.floor((player.y+player.h/2)/TILE);
-
- return {
-  x:Math.max(0,Math.min(COLS-1,tx)),
-  y:Math.max(0,Math.min(ROWS-1,ty))
- };
+ return{x:Math.max(0,Math.min(COLS-1,tx)),y:Math.max(0,Math.min(ROWS-1,ty))};
 }
 
 function breakBlock(){
  if(!running)return;
-
  const t=targetBlock();
-
  if(world[t.y][t.x]){
   world[t.y][t.x]=null;
   document.getElementById("gameMessage").textContent="Block broken!";
  }else{
   document.getElementById("gameMessage").textContent="No block there.";
  }
+ drawGame();
 }
 
 function placeBlock(){
  if(!running)return;
-
  const t=targetBlock();
-
  if(!world[t.y][t.x]){
-  const bx=t.x*TILE;
-  const by=t.y*TILE;
-
-  if(
-   bx+TILE>player.x&&
-   bx<player.x+player.w&&
-   by+TILE>player.y&&
-   by<player.y+player.h
-  ){
+  const bx=t.x*TILE,by=t.y*TILE;
+  if(bx+TILE>player.x&&bx<player.x+player.w&&by+TILE>player.y&&by<player.y+player.h){
    document.getElementById("gameMessage").textContent="Cannot place block inside player.";
    return;
   }
-
   world[t.y][t.x]="dirt";
   document.getElementById("gameMessage").textContent="Block placed!";
  }else{
   document.getElementById("gameMessage").textContent="That space is occupied.";
  }
+ drawGame();
 }
 
 function bindHold(id,key){
  const el=document.getElementById(id);
-
  el.addEventListener("pointerdown",e=>{
   e.preventDefault();
   keys[key]=true;
-
-  if(el.setPointerCapture){
-   el.setPointerCapture(e.pointerId);
-  }
+  if(el.setPointerCapture)el.setPointerCapture(e.pointerId);
  });
-
- ["pointerup","pointerleave","pointercancel","lostpointercapture"]
- .forEach(eventName=>{
-  el.addEventListener(eventName,()=>{
-   keys[key]=false;
-  });
+ ["pointerup","pointerleave","pointercancel","lostpointercapture"].forEach(eventName=>{
+  el.addEventListener(eventName,()=>{keys[key]=false;});
  });
 }
 
 bindHold("leftBtn","left");
 bindHold("rightBtn","right");
 
-document.getElementById("jumpBtn")
- .addEventListener("pointerdown",e=>{
-  e.preventDefault();
-  jump();
- });
+document.getElementById("jumpBtn").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ jump();
+});
 
 createWorld();
 drawGame();
-
 loadPlugins();
 
 if("serviceWorker" in navigator){
@@ -822,12 +630,8 @@ if("serviceWorker" in navigator){
   try{
    await navigator.serviceWorker.register("./service-worker.js");
    console.log("NEXTGEN service worker registered.");
-  }catch(error){
-   console.error("Service worker registration failed:",error);
-  }
+  }catch(error){console.error("Service worker registration failed:",error);}
  });
 }
-</script>
-
-</body>
+</script></body>
 </html>

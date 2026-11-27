@@ -4,7 +4,11 @@ import csv
 import json
 import base64
 import operator
+import zipfile
+import tempfile
+import shutil
 
+from pathlib import Path
 from io import BytesIO, StringIO
 from typing import Optional, Any
 
@@ -19,6 +23,9 @@ from fastapi import (
 )
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
+
 from pydantic import BaseModel, Field
 
 from pypdf import PdfReader
@@ -28,13 +35,16 @@ from pptx import Presentation
 
 
 # =========================================
-# NEXTGEN AI BRAIN CONFIGURATION
+# NEXTGEN AI BRAIN 4.0
 # =========================================
 
 APP_NAME = "NEXTGEN AI BRAIN"
-VERSION = "3.0.0"
 
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+VERSION = "4.0.0"
+
+GROQ_URL = (
+    "https://api.groq.com/openai/v1/chat/completions"
+)
 
 MODEL = os.getenv(
     "AI_MODEL",
@@ -48,7 +58,7 @@ VISION_MODEL = os.getenv(
 
 
 # =========================================
-# FASTAPI APPLICATION
+# FASTAPI
 # =========================================
 
 app = FastAPI(
@@ -92,14 +102,19 @@ class PluginRequest(BaseModel):
 
 class GameCreateRequest(BaseModel):
     game_name: str = "My Godot Game"
+
     engine: str = "Godot 4"
+
     task: str = "create_project"
 
     feature_request: str = ""
+
     feature: Optional[str] = None
+
     request: Optional[str] = None
 
     existing_code: Optional[str] = None
+
     code: Optional[str] = None
 
     platform: str = "Android"
@@ -108,7 +123,7 @@ class GameCreateRequest(BaseModel):
 
 
 # =========================================
-# AI PROVIDER FUNCTION
+# AI PROVIDER
 # =========================================
 
 async def ask_ai(
@@ -117,6 +132,7 @@ async def ask_ai(
     temperature=0.5,
     max_tokens=3000
 ):
+
     api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
@@ -140,13 +156,18 @@ async def ask_ai(
         "stream": False
     }
 
-    # GPT-OSS reasoning configuration
     if selected_model.startswith("openai/gpt-oss"):
+
         payload["include_reasoning"] = False
+
         payload["reasoning_effort"] = "low"
 
     try:
-        async with httpx.AsyncClient(timeout=150) as client:
+
+        async with httpx.AsyncClient(
+            timeout=180
+        ) as client:
+
             response = await client.post(
                 GROQ_URL,
                 headers=headers,
@@ -154,6 +175,7 @@ async def ask_ai(
             )
 
         if response.status_code != 200:
+
             raise HTTPException(
                 status_code=502,
                 detail=(
@@ -168,17 +190,20 @@ async def ask_ai(
         choices = result.get("choices", [])
 
         if not choices:
+
             raise HTTPException(
                 status_code=502,
                 detail="AI provider returned no choices."
             )
 
         choice = choices[0]
+
         message = choice.get("message") or {}
 
         answer = message.get("content")
 
         if isinstance(answer, list):
+
             answer = "\n".join(
                 item.get("text", "")
                 for item in answer
@@ -186,13 +211,12 @@ async def ask_ai(
             )
 
         if not isinstance(answer, str) or not answer.strip():
-            finish_reason = choice.get("finish_reason")
 
             raise HTTPException(
                 status_code=502,
                 detail=(
                     "AI returned an empty final answer. "
-                    f"Finish reason: {finish_reason}"
+                    f"Finish reason: {choice.get('finish_reason')}"
                 )
             )
 
@@ -202,18 +226,21 @@ async def ask_ai(
         raise
 
     except httpx.TimeoutException:
+
         raise HTTPException(
             status_code=504,
-            detail="AI provider timed out. Please try again."
+            detail="AI provider timed out."
         )
 
     except httpx.RequestError:
+
         raise HTTPException(
             status_code=503,
             detail="Could not connect to AI provider."
         )
 
     except (ValueError, KeyError, TypeError):
+
         raise HTTPException(
             status_code=502,
             detail="AI provider returned an invalid response."
@@ -221,11 +248,12 @@ async def ask_ai(
 
 
 # =========================================
-# HOME AND HEALTH
+# HOME
 # =========================================
 
 @app.get("/")
 async def home():
+
     return {
         "name": APP_NAME,
         "version": VERSION,
@@ -236,12 +264,33 @@ async def home():
 
 @app.get("/health")
 async def health():
+
     return {
         "status": "healthy",
         "ai_configured": bool(
             os.getenv("GROQ_API_KEY")
         ),
         "model": MODEL
+    }
+
+
+@app.get("/api/status")
+async def api_status():
+
+    return {
+        "success": True,
+        "name": APP_NAME,
+        "version": VERSION,
+        "status": "online",
+        "features": [
+            "AI Chat",
+            "Image Analysis",
+            "File Analysis",
+            "Smart Analysis",
+            "Plugins",
+            "Godot Game Developer",
+            "Godot ZIP Generator"
+        ]
     }
 
 
@@ -257,10 +306,9 @@ async def chat(request: ChatRequest):
             {
                 "role": "system",
                 "content": (
-                    "You are NEXTGEN AI, a helpful AI assistant. "
-                    "Answer clearly and accurately. "
-                    "You can communicate in English, Cebuano "
-                    "and Filipino. Be honest about limitations."
+                    "You are NEXTGEN AI, a helpful assistant. "
+                    "Communicate in English, Cebuano or Filipino. "
+                    "Give accurate and understandable answers."
                 )
             },
             {
@@ -294,6 +342,7 @@ async def analyze_image(
     uploaded = file or image
 
     if not uploaded:
+
         raise HTTPException(
             status_code=400,
             detail="Please upload an image."
@@ -302,26 +351,31 @@ async def analyze_image(
     content = await uploaded.read()
 
     if not content:
+
         raise HTTPException(
             status_code=400,
-            detail="The uploaded image is empty."
+            detail="Image is empty."
         )
 
     if len(content) > 10 * 1024 * 1024:
+
         raise HTTPException(
             status_code=413,
-            detail="Image is too large. Maximum size is 10 MB."
+            detail="Maximum image size is 10 MB."
         )
 
     mime_type = uploaded.content_type or "image/jpeg"
 
     if not mime_type.startswith("image/"):
+
         raise HTTPException(
             status_code=400,
             detail="Uploaded file must be an image."
         )
 
-    encoded = base64.b64encode(content).decode("utf-8")
+    encoded = base64.b64encode(
+        content
+    ).decode("utf-8")
 
     image_url = (
         f"data:{mime_type};base64,{encoded}"
@@ -362,16 +416,14 @@ async def analyze_image(
 # FILE TEXT EXTRACTION
 # =========================================
 
-def extract_file_text(
-    filename: str,
-    content: bytes
-):
+def extract_file_text(filename, content):
 
     extension = filename.lower().split(".")[-1]
 
     try:
 
         if extension == "txt":
+
             return content.decode(
                 "utf-8",
                 errors="replace"
@@ -379,7 +431,9 @@ def extract_file_text(
 
         elif extension == "pdf":
 
-            reader = PdfReader(BytesIO(content))
+            reader = PdfReader(
+                BytesIO(content)
+            )
 
             return "\n".join(
                 page.extract_text() or ""
@@ -388,7 +442,9 @@ def extract_file_text(
 
         elif extension == "docx":
 
-            document = Document(BytesIO(content))
+            document = Document(
+                BytesIO(content)
+            )
 
             return "\n".join(
                 paragraph.text
@@ -405,6 +461,7 @@ def extract_file_text(
             output = []
 
             for sheet in workbook.worksheets:
+
                 output.append(
                     f"Sheet: {sheet.title}"
                 )
@@ -412,6 +469,7 @@ def extract_file_text(
                 for row in sheet.iter_rows(
                     values_only=True
                 ):
+
                     output.append(
                         " | ".join(
                             str(value)
@@ -463,6 +521,7 @@ def extract_file_text(
             )
 
         else:
+
             raise HTTPException(
                 status_code=400,
                 detail="Unsupported file type."
@@ -472,6 +531,7 @@ def extract_file_text(
         raise
 
     except Exception as error:
+
         raise HTTPException(
             status_code=400,
             detail=f"Could not read file: {str(error)}"
@@ -490,15 +550,17 @@ async def analyze_file(
     content = await file.read()
 
     if not content:
+
         raise HTTPException(
             status_code=400,
             detail="Uploaded file is empty."
         )
 
     if len(content) > 10 * 1024 * 1024:
+
         raise HTTPException(
             status_code=413,
-            detail="File is too large. Maximum size is 10 MB."
+            detail="Maximum file size is 10 MB."
         )
 
     extracted_text = extract_file_text(
@@ -507,12 +569,11 @@ async def analyze_file(
     )
 
     if not extracted_text.strip():
+
         raise HTTPException(
             status_code=400,
-            detail="No readable text found in the file."
+            detail="No readable text found."
         )
-
-    extracted_text = extracted_text[:20000]
 
     answer = await ask_ai(
         messages=[
@@ -520,16 +581,15 @@ async def analyze_file(
                 "role": "system",
                 "content": (
                     "You are NEXTGEN AI file analysis assistant. "
-                    "Analyze documents carefully. "
-                    "Summarize important information and "
-                    "identify useful findings."
+                    "Analyze documents carefully and summarize "
+                    "important information."
                 )
             },
             {
                 "role": "user",
                 "content": (
-                    "Analyze this uploaded file:\n\n"
-                    + extracted_text
+                    "Analyze this file:\n\n"
+                    + extracted_text[:20000]
                 )
             }
         ],
@@ -559,12 +619,11 @@ async def smart_analysis(
     )
 
     if not content.strip():
+
         raise HTTPException(
             status_code=400,
             detail="Please enter something to analyze."
         )
-
-    task = request.task or "Analyze and improve"
 
     answer = await ask_ai(
         messages=[
@@ -572,19 +631,17 @@ async def smart_analysis(
                 "role": "system",
                 "content": (
                     "You are NEXTGEN AI SMART ANALYSIS. "
-                    "Analyze the user's idea, code, product "
-                    "or project. Identify problems, strengths, "
-                    "weaknesses, improvements and practical "
-                    "next steps. Never claim that you physically "
-                    "tested something unless an actual test "
-                    "was performed."
+                    "Analyze ideas, code and projects. "
+                    "Identify strengths, weaknesses, errors "
+                    "and improvements. Never claim physical "
+                    "testing unless it actually happened."
                 )
             },
             {
                 "role": "user",
                 "content": (
-                    f"Task: {task}\n\n"
-                    f"Content:\n{content}"
+                    f"Task: {request.task or 'Analyze and improve'}"
+                    f"\n\nContent:\n{content}"
                 )
             }
         ],
@@ -609,18 +666,15 @@ async def get_plugins():
         "plugins": [
             {
                 "id": "calculator",
-                "name": "Calculator",
-                "description": "Perform basic arithmetic."
+                "name": "Calculator"
             },
             {
                 "id": "text_analyzer",
-                "name": "Text Analyzer",
-                "description": "Analyze text statistics."
+                "name": "Text Analyzer"
             },
             {
                 "id": "json_formatter",
-                "name": "JSON Formatter",
-                "description": "Format and validate JSON."
+                "name": "JSON Formatter"
             }
         ]
     }
@@ -672,6 +726,7 @@ def safe_calculate(expression):
             right = evaluate(node.right)
 
             if isinstance(node.op, ast.Pow):
+
                 if abs(right) > 100:
                     raise ValueError("Exponent too large.")
 
@@ -696,7 +751,7 @@ def safe_calculate(expression):
 
 
 # =========================================
-# PLUGIN EXECUTION
+# RUN PLUGINS
 # =========================================
 
 @app.post("/api/plugins/run")
@@ -728,22 +783,19 @@ async def run_plugin(request: PluginRequest):
 
             raise HTTPException(
                 status_code=400,
-                detail=f"Calculator error: {str(error)}"
+                detail=str(error)
             )
 
     elif plugin == "text_analyzer":
 
         text_value = str(data or "")
 
-        words = text_value.split()
-
         return {
             "success": True,
             "plugin": plugin,
             "characters": len(text_value),
-            "words": len(words),
-            "lines": len(text_value.splitlines()),
-            "sentences": text_value.count(".")
+            "words": len(text_value.split()),
+            "lines": len(text_value.splitlines())
         }
 
     elif plugin == "json_formatter":
@@ -773,79 +825,29 @@ async def run_plugin(request: PluginRequest):
                 detail=f"Invalid JSON: {str(error)}"
             )
 
-    else:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Plugin not found."
-        )
+    raise HTTPException(
+        status_code=404,
+        detail="Plugin not found."
+    )
 
 
 # =========================================
-# GODOT 4 GAME DEVELOPMENT TASKS
+# GODOT GAME TASKS
 # =========================================
 
 GAME_TASKS = [
-    {
-        "id": "create_project",
-        "name": "Create Complete Game Project",
-        "description": "Plan and generate a Godot 4 project."
-    },
-    {
-        "id": "generate",
-        "name": "Generate Game Code",
-        "description": "Create GDScript code and scenes."
-    },
-    {
-        "id": "player",
-        "name": "Player System",
-        "description": "Player movement and customization."
-    },
-    {
-        "id": "animal",
-        "name": "Animal AI",
-        "description": "Animal movement, eating and behavior."
-    },
-    {
-        "id": "monster",
-        "name": "Monster AI",
-        "description": "Monster behavior and combat."
-    },
-    {
-        "id": "world",
-        "name": "World Generation",
-        "description": "Biomes, terrain and environment."
-    },
-    {
-        "id": "npc",
-        "name": "NPC System",
-        "description": "Villagers and intelligent NPCs."
-    },
-    {
-        "id": "combat",
-        "name": "Combat System",
-        "description": "Weapons, attacks and health."
-    },
-    {
-        "id": "inventory",
-        "name": "Inventory System",
-        "description": "Items, hotbar and crafting."
-    },
-    {
-        "id": "review",
-        "name": "Review Game Code",
-        "description": "Inspect code and identify problems."
-    },
-    {
-        "id": "fix",
-        "name": "Fix Game Bugs",
-        "description": "Find and correct code errors."
-    },
-    {
-        "id": "optimize",
-        "name": "Android Optimization",
-        "description": "Improve mobile performance."
-    }
+    {"id": "create_project", "name": "Create Complete Game Project"},
+    {"id": "generate", "name": "Generate Game Code"},
+    {"id": "player", "name": "Player System"},
+    {"id": "animal", "name": "Animal AI"},
+    {"id": "monster", "name": "Monster AI"},
+    {"id": "world", "name": "World Generation"},
+    {"id": "npc", "name": "NPC System"},
+    {"id": "combat", "name": "Combat System"},
+    {"id": "inventory", "name": "Inventory System"},
+    {"id": "review", "name": "Review Game Code"},
+    {"id": "fix", "name": "Fix Game Bugs"},
+    {"id": "optimize", "name": "Android Optimization"}
 ]
 
 
@@ -860,23 +862,49 @@ async def get_game_tasks():
 
 
 # =========================================
-# AI GAME DEVELOPER
+# GAME DEVELOPER
 # =========================================
 
-@app.post("/api/game/create")
-async def create_game(
-    request: GameCreateRequest
-):
+GAME_SYSTEM_PROMPT = """
+You are NEXTGEN AI GAME DEVELOPER.
 
-    game_name = request.game_name
-    engine = request.engine
-    task = request.task
+You develop games using Godot 4 and GDScript 2.0.
+
+Rules:
+
+1. Use Godot 4 syntax only.
+2. Never use Godot 3 APIs.
+3. Generate practical code.
+4. Explain filenames and folder structure.
+5. Include scene setup instructions.
+6. Use Android-friendly touch controls.
+7. Do not claim code is tested unless it is.
+8. Do not claim an APK was built unless it was.
+9. Do not reference nonexistent assets.
+10. Make code organized and understandable.
+
+For BLOCK WORLD SURVIVAL preserve:
+- Voxel/block-style graphics
+- Player customization
+- Survival mechanics
+- Animal AI
+- Monster AI
+- World generation
+- Inventory and crafting
+- Android touch controls
+- Offline gameplay
+- Future multiplayer support
+"""
+
+
+@app.post("/api/game/create")
+async def create_game(request: GameCreateRequest):
 
     feature = (
         request.feature_request
         or request.feature
         or request.request
-        or ""
+        or "Create a starter game project."
     )
 
     existing_code = (
@@ -885,105 +913,32 @@ async def create_game(
         or ""
     )
 
-    if not feature.strip() and not existing_code.strip():
-        if task not in ("create_project",):
-            raise HTTPException(
-                status_code=400,
-                detail="Please describe the game development task."
-            )
-
-    task_names = {
-        item["id"]: item["name"]
-        for item in GAME_TASKS
-    }
-
-    task_name = task_names.get(
-        task,
-        task
-    )
-
-    system_prompt = """
-You are NEXTGEN AI GAME DEVELOPER.
-
-Your job is to help create real game projects using Godot 4.
-
-IMPORTANT RULES:
-
-1. Use Godot 4 and valid GDScript 2.0 syntax.
-2. Do not use Godot 3 syntax.
-3. Generate practical, organized and understandable code.
-4. Include filenames and folder structures.
-5. Include scene setup instructions.
-6. Include node paths and required node types.
-7. Explain how scripts connect to each other.
-8. For Android, consider touch controls and performance.
-9. Do not claim code has been tested unless it was actually tested.
-10. Do not claim an APK has been built unless it was actually built.
-11. If information is missing, state reasonable assumptions.
-12. Avoid fake assets, fake download links and imaginary files.
-13. Make code as complete as reasonably possible.
-
-For BLOCK WORLD SURVIVAL, preserve the requested
-voxel/block-style graphics and survival gameplay.
-
-The game should eventually support:
-- Player movement and customization
-- Animals with intelligent behaviors
-- Monsters and combat
-- World generation and biomes
-- Inventory and crafting
-- Building and survival systems
-- Android touch controls
-- Offline gameplay
-- Future multiplayer support
-
-When generating a project, provide:
-- Project folder structure
-- project.godot configuration
-- Main scene
-- GDScript files
-- Scene creation instructions
-- Testing instructions
-
-When reviewing or fixing code:
-- Identify errors
-- Explain why they happen
-- Return corrected complete code where possible
-- Explain how to test the correction
-
-Be honest about limitations.
-"""
-
-    user_prompt = f"""
-GAME NAME: {game_name}
-
-GAME ENGINE: {engine}
-
-TARGET PLATFORM: {request.platform}
-
-DEVELOPMENT TASK: {task_name}
-
-FEATURE OR REQUEST:
-{feature if feature else "Create the initial project structure."}
-
-EXISTING CODE:
-{existing_code if existing_code else "No existing code provided."}
-
-Please complete this development task.
-
-For generated code, clearly label each filename.
-Do not return an empty answer.
-"""
-
     answer = await ask_ai(
         messages=[
             {
                 "role": "system",
-                "content": system_prompt
+                "content": GAME_SYSTEM_PROMPT
             },
             {
                 "role": "user",
-                "content": user_prompt
+                "content": f"""
+Game: {request.game_name}
+
+Engine: {request.engine}
+
+Platform: {request.platform}
+
+Task: {request.task}
+
+Feature:
+{feature}
+
+Existing code:
+{existing_code}
+
+Generate the requested development output.
+Label every filename clearly.
+"""
             }
         ],
         model=request.model,
@@ -993,38 +948,319 @@ Do not return an empty answer.
 
     return {
         "success": True,
-        "game_name": game_name,
-        "engine": engine,
-        "task": task,
+        "game_name": request.game_name,
+        "engine": request.engine,
+        "task": request.task,
         "project_output": answer,
         "model": request.model or MODEL,
         "tested": False,
         "note": (
-            "Generated code must still be installed, "
-            "executed and tested in the game engine. "
-            "This API does not automatically build an APK."
+            "Generated code must still be opened "
+            "and tested in Godot 4."
         )
     }
 
 
 # =========================================
-# SERVER STARTUP INFORMATION
+# PARSE AI PROJECT JSON
 # =========================================
 
-@app.get("/api/status")
-async def api_status():
+def parse_project_json(answer):
 
-    return {
-        "success": True,
-        "name": APP_NAME,
-        "version": VERSION,
-        "status": "online",
-        "features": [
-            "AI Chat",
-            "Image Analysis",
-            "File Analysis",
-            "Smart Analysis",
-            "Plugins",
-            "Godot 4 Game Developer"
-        ]
-    }
+    cleaned = answer.strip()
+
+    if cleaned.startswith("```"):
+
+        lines = cleaned.splitlines()
+
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+
+        cleaned = "\n".join(lines)
+
+    try:
+
+        return json.loads(cleaned)
+
+    except json.JSONDecodeError:
+
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+
+        if start == -1 or end == -1 or end <= start:
+            raise ValueError("No JSON object found.")
+
+        return json.loads(
+            cleaned[start:end + 1]
+        )
+
+
+# =========================================
+# GODOT 4 ZIP GENERATOR
+# =========================================
+
+ZIP_SYSTEM_PROMPT = """
+You are NEXTGEN AI GODOT 4 PROJECT GENERATOR.
+
+Return ONLY a valid JSON object.
+
+Required format:
+
+{
+  "files": {
+    "project.godot": "file contents",
+    "scenes/Main.tscn": "file contents",
+    "scripts/main.gd": "file contents",
+    "scripts/player.gd": "file contents",
+    "scripts/world.gd": "file contents",
+    "scripts/touch_controls.gd": "file contents",
+    "scripts/inventory.gd": "file contents",
+    "scripts/animal.gd": "file contents",
+    "README.md": "file contents"
+  }
+}
+
+PROJECT REQUIREMENTS:
+
+- Godot 4 only.
+- Valid GDScript 2.0.
+- Create a playable 2D starter game.
+- Use built-in shapes and drawing.
+- Do not require external assets.
+- Create a working main scene.
+- Include player movement.
+- Include a simple generated grass world.
+- Include Android touch buttons.
+- Include inventory and hotbar.
+- Include basic animal wandering and eating behavior.
+- Make all scripts compatible with each other.
+- Include project setup instructions.
+- Include testing instructions.
+- Do not claim the project has been tested.
+- Avoid missing node references.
+- Do not use Godot 3 syntax.
+
+Return all required files in the JSON files object.
+"""
+
+
+@app.post("/api/game/create-zip")
+async def create_game_zip(request: GameCreateRequest):
+
+    game_name = request.game_name or "NEXTGEN_GAME"
+
+    safe_name = "".join(
+        character
+        for character in game_name
+        if character.isalnum()
+        or character in ("-", "_")
+    ).strip()
+
+    if not safe_name:
+        safe_name = "NEXTGEN_GAME"
+
+    feature = (
+        request.feature_request
+        or request.feature
+        or request.request
+        or "Create a complete starter survival game."
+    )
+
+    answer = await ask_ai(
+        messages=[
+            {
+                "role": "system",
+                "content": ZIP_SYSTEM_PROMPT
+            },
+            {
+                "role": "user",
+                "content": f"""
+GAME NAME: {game_name}
+
+ENGINE: Godot 4
+
+PLATFORM: {request.platform}
+
+FEATURE REQUEST:
+{feature}
+
+Generate all required project files.
+
+Return valid JSON only.
+"""
+            }
+        ],
+        model=request.model,
+        temperature=0.2,
+        max_tokens=12000
+    )
+
+    try:
+
+        project_data = parse_project_json(answer)
+
+        files = project_data.get("files")
+
+        if not isinstance(files, dict):
+            raise ValueError("Missing files object.")
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "AI did not return a valid project file list. "
+                f"Please try again. Details: {str(error)}"
+            )
+        )
+
+    required_files = [
+        "project.godot",
+        "scenes/Main.tscn",
+        "scripts/main.gd",
+        "scripts/player.gd",
+        "scripts/world.gd",
+        "scripts/touch_controls.gd",
+        "scripts/inventory.gd",
+        "scripts/animal.gd",
+        "README.md"
+    ]
+
+    missing_files = [
+        filename
+        for filename in required_files
+        if filename not in files
+    ]
+
+    if missing_files:
+
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "message": "AI project is incomplete.",
+                "missing_files": missing_files
+            }
+        )
+
+    if len(files) > 60:
+
+        raise HTTPException(
+            status_code=502,
+            detail="AI generated too many files."
+        )
+
+    temp_dir = tempfile.mkdtemp(
+        prefix="nextgen_game_"
+    )
+
+    project_dir = (
+        Path(temp_dir) / safe_name
+    )
+
+    project_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    try:
+
+        total_size = 0
+
+        for filename, content in files.items():
+
+            if not isinstance(filename, str):
+                continue
+
+            if not isinstance(content, str):
+                continue
+
+            relative_path = Path(filename)
+
+            if (
+                relative_path.is_absolute()
+                or ".." in relative_path.parts
+            ):
+                continue
+
+            total_size += len(
+                content.encode("utf-8")
+            )
+
+            if total_size > 2 * 1024 * 1024:
+
+                raise ValueError(
+                    "Generated project exceeds 2 MB."
+                )
+
+            target = project_dir / relative_path
+
+            target.parent.mkdir(
+                parents=True,
+                exist_ok=True
+            )
+
+            target.write_text(
+                content,
+                encoding="utf-8"
+            )
+
+        zip_path = (
+            Path(temp_dir) / f"{safe_name}.zip"
+        )
+
+        with zipfile.ZipFile(
+            zip_path,
+            "w",
+            zipfile.ZIP_DEFLATED
+        ) as archive:
+
+            for file_path in project_dir.rglob("*"):
+
+                if file_path.is_file():
+
+                    archive.write(
+                        file_path,
+                        file_path.relative_to(temp_dir)
+                    )
+
+        if (
+            not zip_path.exists()
+            or zip_path.stat().st_size == 0
+        ):
+
+            raise ValueError(
+                "ZIP file creation failed."
+            )
+
+        return FileResponse(
+            path=str(zip_path),
+            filename=f"{safe_name}.zip",
+            media_type="application/zip",
+            background=BackgroundTask(
+                shutil.rmtree,
+                temp_dir,
+                ignore_errors=True
+            )
+        )
+
+    except Exception as error:
+
+        shutil.rmtree(
+            temp_dir,
+            ignore_errors=True
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Could not create project ZIP: {str(error)}"
+            )
+        )
+
+
+# =========================================
+# END
+# =========================================

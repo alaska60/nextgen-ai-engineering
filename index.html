@@ -109,6 +109,7 @@ hr{border:1px solid #334155;margin:18px 0}
   <h2>🌍 CREATE WORLD</h2>
   <label>World Name</label>
   <input id="worldName" value="My Survival World">
+
   <label>World Type</label>
   <select id="worldType">
     <option value="grass">🌳 Green Grass World</option>
@@ -117,6 +118,7 @@ hr{border:1px solid #334155;margin:18px 0}
     <option value="volcano">🌋 Volcano World</option>
     <option value="cherry">🌸 Cherry Blossom World</option>
   </select>
+
   <button onclick="createWorldFromMenu()">🌎 Create & Play</button>
   <button onclick="showSection('mainMenu')">⬅ Back</button>
 </section>
@@ -136,17 +138,20 @@ hr{border:1px solid #334155;margin:18px 0}
 
 <section id="settingsSection" class="hidden">
   <h2>⚙️ GAME SETTINGS</h2>
+
   <label>Graphics Preview</label>
   <select id="graphics">
     <option>Low</option>
     <option selected>Medium</option>
     <option>High</option>
   </select>
+
   <label>Frame Rate Preference</label>
   <select id="fps">
     <option>30 FPS</option>
     <option>60 FPS</option>
   </select>
+
   <p class="small">These are preference controls only; they do not change the game engine yet.</p>
   <button onclick="showSection('mainMenu')">⬅ Back</button>
 </section>
@@ -290,7 +295,7 @@ hr{border:1px solid #334155;margin:18px 0}
   <div id="pluginOutput" class="output">Plugin result will appear here.</div>
 </section>
 
-<!-- UPGRADED AI GAME DEVELOPER -->
+<!-- AI GAME DEVELOPER -->
 <section id="gameWorker">
   <h2>🤖 BLOCK WORLD SURVIVAL GAME DEVELOPER</h2>
   <p>AI-powered development assistant for our Godot game project.</p>
@@ -349,7 +354,9 @@ async function apiRequest(path, options={}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.detail || data.error || "Request failed: " + response.status);
+    throw new Error(
+      data.detail || data.error || "Request failed: " + response.status
+    );
   }
 
   return data;
@@ -375,7 +382,9 @@ function createWorldFromMenu() {
   const name = document.getElementById("worldName").value.trim();
   const type = document.getElementById("worldType").value;
 
-  document.getElementById("gameName").value = name || "BLOCK WORLD SURVIVAL";
+  document.getElementById("gameName").value =
+    name || "BLOCK WORLD SURVIVAL";
+
   document.getElementById("gameWorldType").value =
     ["grass","desert","snow"].includes(type) ? type : "grass";
 
@@ -387,30 +396,42 @@ function createWorldFromMenu() {
 /* BASIC 2D GAME PROTOTYPE */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
 const TILE = 32;
 const COLS = 20;
 const ROWS = 11;
 
 let world = [];
-let player = {x:90,y:180,w:23,h:29,vx:0,vy:0,onGround:false,jumps:0};
+let player = {
+  x:90,y:180,w:23,h:29,
+  vx:0,vy:0,onGround:false,jumps:0
+};
+
 let keys = {left:false,right:false};
 let gameRunning = false;
 let selectedBlock = 0;
 let inventoryCounts = [64,32,1,1,10];
 
-const itemNames = ["Grass Block","Wood","Pickaxe","Sword","Apple"];
+const itemNames = [
+  "Grass Block","Wood","Pickaxe","Sword","Apple"
+];
 
 function createWorld() {
   world = [];
 
   for (let y=0;y<ROWS;y++) {
     world[y] = [];
+
     for (let x=0;x<COLS;x++) {
       world[y][x] = y >= 9 ? 1 : 0;
     }
   }
 
-  player = {x:90,y:180,w:23,h:29,vx:0,vy:0,onGround:false,jumps:0};
+  player = {
+    x:90,y:180,w:23,h:29,
+    vx:0,vy:0,onGround:false,jumps:0
+  };
+
   drawGame();
 }
 
@@ -420,8 +441,15 @@ function drawGame() {
   let sky = "#7dd3fc";
   let ground = "#22c55e";
 
-  if(type==="desert"){sky="#fbbf24";ground="#d6a84b";}
-  if(type==="snow"){sky="#bae6fd";ground="#e2e8f0";}
+  if(type==="desert"){
+    sky="#fbbf24";
+    ground="#d6a84b";
+  }
+
+  if(type==="snow"){
+    sky="#bae6fd";
+    ground="#e2e8f0";
+  }
 
   ctx.fillStyle=sky;
   ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -429,19 +457,30 @@ function drawGame() {
   for(let y=0;y<ROWS;y++) {
     for(let x=0;x<COLS;x++) {
       if(world[y] && world[y][x]) {
-        ctx.fillStyle = world[y][x]===2 ? "#a16207" : ground;
-        ctx.fillRect(x*TILE,y*TILE,TILE,TILE);
+        ctx.fillStyle =
+          world[y][x]===2 ? "#a16207" : ground;
+
+        ctx.fillRect(
+          x*TILE,y*TILE,TILE,TILE
+        );
+
         ctx.strokeStyle="rgba(0,0,0,.12)";
-        ctx.strokeRect(x*TILE,y*TILE,TILE,TILE);
+        ctx.strokeRect(
+          x*TILE,y*TILE,TILE,TILE
+        );
       }
     }
   }
 
   ctx.fillStyle="#2563eb";
-  ctx.fillRect(player.x,player.y,player.w,player.h);
+  ctx.fillRect(
+    player.x,player.y,player.w,player.h
+  );
 
   ctx.fillStyle="#facc15";
-  ctx.fillRect(player.x+4,player.y+3,15,10);
+  ctx.fillRect(
+    player.x+4,player.y+3,15,10
+  );
 
   ctx.fillStyle="#111827";
   ctx.fillRect(player.x+7,player.y+7,3,3);
@@ -454,7 +493,9 @@ function startGame() {
   createWorld();
   gameRunning=true;
 
-  document.getElementById("gameStatus").textContent="🎮 Game started!";
+  document.getElementById("gameStatus").textContent =
+    "🎮 Game started!";
+
   requestAnimationFrame(gameLoop);
 }
 
@@ -468,9 +509,13 @@ function gameLoop() {
   if(keys.right)player.vx=speed;
 
   let nextX=player.x+player.vx;
-  if(!collides(nextX,player.y))player.x=nextX;
+
+  if(!collides(nextX,player.y)){
+    player.x=nextX;
+  }
 
   player.vy+=0.55;
+
   if(player.vy>10)player.vy=10;
 
   let nextY=player.y+player.vy;
@@ -480,12 +525,17 @@ function gameLoop() {
     player.onGround=false;
   } else {
     if(player.vy>0)player.onGround=true;
+
     player.vy=0;
+
     if(player.onGround)player.jumps=0;
   }
 
   if(player.x<0)player.x=0;
-  if(player.x+player.w>canvas.width)player.x=canvas.width-player.w;
+
+  if(player.x+player.w>canvas.width) {
+    player.x=canvas.width-player.w;
+  }
 
   if(player.y>canvas.height) {
     player.x=90;
@@ -509,7 +559,8 @@ function collides(px,py) {
     const tx=Math.floor(x/TILE);
     const ty=Math.floor(y/TILE);
 
-    return ty>=0 && ty<ROWS && tx>=0 && tx<COLS &&
+    return ty>=0 && ty<ROWS &&
+      tx>=0 && tx<COLS &&
       world[ty] && world[ty][tx]!==0;
   });
 }
@@ -539,11 +590,17 @@ function bindHold(id,key) {
 bindHold("leftBtn","left");
 bindHold("rightBtn","right");
 
-document.getElementById("jumpBtn").addEventListener("click",jump);
+document.getElementById("jumpBtn")
+  .addEventListener("click",jump);
 
 function targetBlock() {
-  const tx=Math.floor((player.x+player.w+3)/TILE);
-  const ty=Math.floor((player.y+player.h/2)/TILE);
+  const tx=Math.floor(
+    (player.x+player.w+3)/TILE
+  );
+
+  const ty=Math.floor(
+    (player.y+player.h/2)/TILE
+  );
 
   if(tx<0||tx>=COLS||ty<0||ty>=ROWS)return null;
 
@@ -552,6 +609,7 @@ function targetBlock() {
 
 function breakBlock() {
   const t=targetBlock();
+
   if(!t)return;
 
   if(world[t.ty][t.tx]!==0) {
@@ -564,14 +622,16 @@ function breakBlock() {
 
 function placeBlock() {
   if(selectedBlock!==0) {
-    document.getElementById("gameStatus").textContent=
+    document.getElementById("gameStatus").textContent =
       "Grass Block is the only placeable block in this prototype.";
+
     return;
   }
 
   if(inventoryCounts[0]<=0)return;
 
   const t=targetBlock();
+
   if(!t)return;
 
   if(world[t.ty][t.tx]===0) {
@@ -583,30 +643,35 @@ function placeBlock() {
 }
 
 function attack() {
-  document.getElementById("gameStatus").textContent=
+  document.getElementById("gameStatus").textContent =
     "⚔ Attack button pressed. Combat system is planned.";
 }
 
 function resetWorld() {
   createWorld();
-  document.getElementById("gameStatus").textContent="World reset!";
+
+  document.getElementById("gameStatus").textContent =
+    "World reset!";
 }
 
 function selectItem(index) {
   selectedBlock=index;
 
-  document.getElementById("selectedItem").textContent=
+  document.getElementById("selectedItem").textContent =
     "Selected: "+itemNames[index];
 }
 
 function toggleInventory() {
-  document.getElementById("inventoryPanel").classList.toggle("hidden");
+  document.getElementById("inventoryPanel")
+    .classList.toggle("hidden");
 }
 
 function updateInventory() {
-  document.getElementById("inventoryItems").textContent=
-    "Grass: "+inventoryCounts[0]+" | Wood: "+inventoryCounts[1]+
-    " | Pickaxe: "+inventoryCounts[2]+" | Sword: "+inventoryCounts[3]+
+  document.getElementById("inventoryItems").textContent =
+    "Grass: "+inventoryCounts[0]+
+    " | Wood: "+inventoryCounts[1]+
+    " | Pickaxe: "+inventoryCounts[2]+
+    " | Sword: "+inventoryCounts[3]+
     " | Apple: "+inventoryCounts[4];
 }
 
@@ -614,7 +679,9 @@ createWorld();
 
 /* AI CHAT */
 async function sendChat() {
-  const message=document.getElementById("chatMessage").value.trim();
+  const message =
+    document.getElementById("chatMessage").value.trim();
+
   const out=document.getElementById("chatOutput");
 
   if(!message) {
@@ -631,7 +698,11 @@ async function sendChat() {
       body:JSON.stringify({message})
     });
 
-    out.textContent=data.response||data.reply||JSON.stringify(data,null,2);
+    out.textContent =
+      data.response ||
+      data.reply ||
+      JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error: "+e.message;
   }
@@ -649,6 +720,7 @@ async function analyzeImage() {
   }
 
   const form=new FormData();
+
   form.append("file",file);
   form.append("prompt",prompt||"Analyze this image.");
 
@@ -660,7 +732,11 @@ async function analyzeImage() {
       body:form
     });
 
-    out.textContent=data.analysis||data.response||JSON.stringify(data,null,2);
+    out.textContent =
+      data.analysis ||
+      data.response ||
+      JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error: "+e.message;
   }
@@ -692,7 +768,11 @@ async function analyzeFile() {
       body:form
     });
 
-    out.textContent=data.analysis||data.response||JSON.stringify(data,null,2);
+    out.textContent =
+      data.analysis ||
+      data.response ||
+      JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error: "+e.message;
   }
@@ -713,7 +793,7 @@ async function generatePlan() {
 
   out.textContent="Generating project plan...";
 
-  const message=
+  const message =
     "Create a practical step-by-step project plan. "+
     "Project name: "+name+". Type: "+type+
     ". Goal: "+goal+". Features: "+features+
@@ -726,7 +806,11 @@ async function generatePlan() {
       body:JSON.stringify({message})
     });
 
-    out.textContent=data.response||data.reply||JSON.stringify(data,null,2);
+    out.textContent =
+      data.response ||
+      data.reply ||
+      JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error: "+e.message;
   }
@@ -741,7 +825,11 @@ function savePlan() {
     output:document.getElementById("planOutput").textContent
   };
 
-  localStorage.setItem("NEXTGEN_PROJECT_PLAN",JSON.stringify(plan));
+  localStorage.setItem(
+    "NEXTGEN_PROJECT_PLAN",
+    JSON.stringify(plan)
+  );
+
   alert("Project plan saved on this phone!");
 }
 
@@ -781,7 +869,11 @@ async function runSmartAnalysis() {
       body:JSON.stringify({content:input})
     });
 
-    out.textContent=data.analysis||data.result||JSON.stringify(data,null,2);
+    out.textContent =
+      data.analysis ||
+      data.result ||
+      JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error: "+e.message;
   }
@@ -790,11 +882,14 @@ async function runSmartAnalysis() {
 /* PLUGINS */
 async function loadPlugins() {
   const out=document.getElementById("pluginList");
+
   out.textContent="Loading plugins...";
 
   try {
     const data=await apiRequest("/api/plugins");
+
     out.textContent=JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Error loading plugins: "+e.message;
   }
@@ -815,6 +910,7 @@ async function runPlugin() {
     });
 
     out.textContent=JSON.stringify(data,null,2);
+
   } catch(e) {
     out.textContent="Plugin error: "+e.message;
   }
@@ -822,132 +918,75 @@ async function runPlugin() {
 
 /* BLOCK WORLD SURVIVAL GAME DEVELOPER */
 async function runGameWorker() {
-  const task=document.getElementById("workerTask").value;
-  const engine=document.getElementById("workerEngine").value;
-  const feature=document.getElementById("gameFeature").value.trim();
-  const code=document.getElementById("existingGameCode").value.trim();
-  const out=document.getElementById("gameWorkerOutput");
+  const task =
+    document.getElementById("workerTask").value;
+
+  const engine =
+    document.getElementById("workerEngine").value;
+
+  const feature =
+    document.getElementById("gameFeature").value.trim();
+
+  const code =
+    document.getElementById("existingGameCode").value.trim();
+
+  const gameName =
+    document.getElementById("gameName").value.trim() ||
+    "BLOCK WORLD SURVIVAL";
+
+  const out =
+    document.getElementById("gameWorkerOutput");
 
   if(!feature) {
-    out.textContent="Please describe what you want to develop.";
+    out.textContent =
+      "Please describe what you want to develop.";
+
     return;
   }
 
-  const tasks={
-    create_project:
-      "Create a complete Godot project structure with folders, scenes, scripts and project configuration.",
-
-    generate:
-      "Generate complete Godot 4 GDScript files.",
-
-    player:
-      "Develop a complete player controller and character system.",
-
-    animal:
-      "Develop intelligent animal AI including finding food and water, eating, drinking, sleeping, resting, fleeing predators, reproducing and caring for babies.",
-
-    monster:
-      "Develop monster AI including player detection, chasing, attacking, hunting and special abilities.",
-
-    world:
-      "Develop voxel world generation, terrain, chunk loading and biome systems.",
-
-    npc:
-      "Develop NPC and villager AI including jobs, homes, conversations, families, trading and kingdoms.",
-
-    combat:
-      "Develop weapons, armor, combat mechanics, damage, defense and boss battle systems.",
-
-    inventory:
-      "Develop inventory, hotbar, item stacking, crafting, storage and equipment systems.",
-
-    review:
-      "Review supplied code and identify errors, missing dependencies and improvements.",
-
-    fix:
-      "Find bugs and provide corrected complete code with explanations.",
-
-    optimize:
-      "Optimize the game for Android devices with limited RAM and processing power."
-  };
-
-  const message=`
-You are the professional AI GAME DEVELOPER
-for BLOCK WORLD SURVIVAL.
-
-GAME ENGINE: ${engine}
-TASK: ${tasks[task]}
-
-GAME REQUIREMENTS:
-- Minecraft-style voxel/block graphics.
-- Godot 4 and GDScript.
-- Android compatibility.
-- Offline gameplay as a priority.
-- Modular and organized project structure.
-- Support future expansion into a large survival game.
-- Free-first development.
-- Do not require paid tools or services.
-
-REQUEST:
-${feature}
-
-EXISTING CODE:
-${code || "No existing code supplied."}
-
-IMPORTANT INSTRUCTIONS:
-
-1. Give the exact project folder structure.
-2. Give the exact filename for every file.
-3. Provide complete code, not incomplete snippets.
-4. Explain where every file belongs.
-5. Include necessary scene and node setup.
-6. Identify dependencies and Godot version requirements.
-7. Explain how to run and test the project.
-8. Review possible errors before presenting code.
-9. Never claim code was executed or tested if it was not.
-10. Do not invent completed features.
-11. Keep the code organized and suitable for future expansion.
-12. Use GDScript compatible with Godot 4.
-13. Separate different scripts into their own files.
-14. Mention any features that still need implementation.
-
-Organize the answer into:
-
-A. Project Structure
-B. Files and Complete Code
-C. Installation Instructions
-D. Testing Instructions
-E. Known Limitations
-`;
-
-  out.textContent="🤖 AI Game Developer is creating your project. Please wait...";
+  out.textContent =
+    "🤖 NEXTGEN AI GAME DEVELOPER is working. Please wait...";
 
   try {
-    const data=await apiRequest("/api/chat",{
+    const data=await apiRequest("/api/game/create",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({message})
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        game_name:gameName,
+        engine:engine,
+        task:task,
+        description:feature,
+        existing_code:code
+      })
     });
 
-    out.textContent=
-      data.response||
-      data.reply||
+    out.textContent =
+      data.project_output ||
+      data.response ||
+      data.reply ||
       JSON.stringify(data,null,2);
 
   } catch(error) {
-    out.textContent="Development Error: "+error.message;
+    out.textContent =
+      "GAME DEVELOPMENT ERROR: "+error.message;
   }
 }
 
 /* COPY GAME DEVELOPER OUTPUT */
 async function copyGameCode() {
-  const text=document.getElementById("gameWorkerOutput").textContent;
+  const text =
+    document.getElementById("gameWorkerOutput").textContent;
 
   try {
     await navigator.clipboard.writeText(text);
     alert("AI output copied!");
+
   } catch(e) {
-    alert("Copy not available in this browser. Please select and copy the text manually.");
+    alert(
+      "Copy not available in this browser. Please select and copy the text manually."
+    );
   }
 }
 
@@ -957,7 +996,9 @@ loadPlugins();
 /* SERVICE WORKER */
 if("serviceWorker" in navigator) {
   window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+    navigator.serviceWorker
+      .register("./service-worker.js")
+      .catch(()=>{});
   });
 }
 </script>

@@ -2,6 +2,11 @@ import os
 import base64
 import httpx
 
+from io import BytesIO
+from pypdf import PdfReader
+from docx import Document
+from openpyxl import load_workbook
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -87,7 +92,8 @@ async def chat(data: ChatRequest):
         if response.status_code != 200:
             raise HTTPException(
                 502,
-                f"Groq error {response.status_code}: {response.text[:300]}"
+                f"Groq error {response.status_code}: "
+                f"{response.text[:300]}"
             )
 
         result = response.json()
@@ -98,20 +104,19 @@ async def chat(data: ChatRequest):
         }
 
     except httpx.RequestError:
-        raise HTTPException(503, "Could not connect to AI provider")
+        raise HTTPException(
+            503,
+            "Could not connect to AI provider"
+        )
 
 
 @app.post("/api/analyze-image")
 async def analyze_image(
     image: UploadFile = File(...),
-    prompt: str = Form("Describe this image clearly and briefly.")
+    prompt: str = Form(
+        "Describe this image clearly and briefly."
+    )
 ):
-    
-    
-
-
-
-
 
     api_key = os.getenv("GROQ_API_KEY")
 
@@ -132,11 +137,14 @@ async def analyze_image(
 
     image_data = await image.read()
 
-    if len(image_data) > 10 * 1024 * 1024:
-        raise HTTPException(413, "Image must be 10 MB or smaller.")
-
     if not image_data:
         raise HTTPException(400, "Image is empty.")
+
+    if len(image_data) > 10 * 1024 * 1024:
+        raise HTTPException(
+            413,
+            "Image must be 10 MB or smaller."
+        )
 
     encoded_image = base64.b64encode(
         image_data
@@ -201,4 +209,154 @@ async def analyze_image(
         raise HTTPException(
             503,
             "Could not connect to image AI provider"
+        )
+
+
+@app.post("/api/analyze-file")
+async def analyze_file(file: UploadFile = File(...)):
+
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        raise HTTPException(500, "AI key is not configured")
+
+    filename = file.filename or ""
+    extension = os.path.splitext(filename)[1].lower()
+
+    allowed_extensions = [
+        ".txt",
+        ".pdf",
+        ".docx",
+        ".xlsx"
+    ]
+
+    if extension not in allowed_extensions:
+        raise HTTPException(
+            400,
+            "Supported files: TXT, PDF, DOCX and XLSX."
+        )
+
+    data = await file.read()
+
+    if not data:
+        raise HTTPException(400, "File is empty.")
+
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(
+            413,
+            "File must be 10 MB or smaller."
+        )
+
+    try:
+
+        if extension == ".txt":
+            content = data.decode("utf-8-sig")
+
+        elif extension == ".pdf":
+            reader = PdfReader(BytesIO(data))
+
+            content = "\n".join(
+                page.extract_text() or ""
+                for page in reader.pages
+            )
+
+        elif extension == ".docx":
+            document = Document(BytesIO(data))
+
+            content = "\n".join(
+                paragraph.text
+                for paragraph in document.paragraphs
+            )
+
+        elif extension == ".xlsx":
+            workbook = load_workbook(
+                BytesIO(data),
+                read_only=True,
+                data_only=True
+            )
+
+            rows = []
+
+            for sheet in workbook.worksheets:
+                rows.append(f"Sheet: {sheet.title}")
+
+                for row in sheet.iter_rows(values_only=True):
+                    rows.append(
+                        " | ".join(
+                            str(value) if value is not None else ""
+                            for value in row
+                        )
+                    )
+
+            content = "\n".join(rows)
+            workbook.close()
+
+    except Exception:
+        raise HTTPException(
+            400,
+            "Could not read this file. Please check the file format."
+        )
+
+    if not content.strip():
+        raise HTTPException(
+            400,
+            "No readable text found in this file."
+        )
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are NEXTGEN AI CREATOR. "
+                    "Analyze uploaded documents and files. "
+                    "Understand Cebuano and English. "
+                    "Explain the contents clearly."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Analyze this file: {filename}\n\n"
+                    f"File contents:\n{content[:12000]}"
+                )
+            }
+        ],
+        "temperature": 0.5,
+        "max_completion_tokens": 1500
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(
+                GROQ_URL,
+                headers=headers,
+                json=payload
+            )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                502,
+                f"File AI error {response.status_code}: "
+                f"{response.text[:300]}"
+            )
+
+        result = response.json()
+
+        return {
+            "reply": result["choices"][0]["message"]["content"],
+            "filename": filename,
+            "model": MODEL
+        }
+
+    except httpx.RequestError:
+        raise HTTPException(
+            503,
+            "Could not connect to AI provider"
         )

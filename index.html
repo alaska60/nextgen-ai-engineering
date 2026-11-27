@@ -5,52 +5,26 @@
 <meta name="theme-color" content="#101827">
 <meta name="description" content="Your AI Engineering Assistant">
 <link rel="manifest" href="./manifest.json">
-<title>NEXTGEN AI CREATOR</title><style>
-body {
-  margin: 0;
-  padding: 20px;
-  background: #101827;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-h1 { color: #38d9ff; }
-.box {
-  background: #1e293b;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-}
-textarea, input, select, button {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: none;
-}
-textarea {
-  min-height: 90px;
-  resize: vertical;
-}
-button {
-  background: #08a6d9;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-button:disabled { opacity: 0.6; }
-#result, #pluginResult, #smartResult, #plannerResult {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.status {
-  color: #38d9ff;
-  font-size: 14px;
-}
-.secondary {
-  background: #475569;
-}
-</style></head><body><h1>🚀 NEXTGEN AI CREATOR</h1>
+<title>NEXTGEN AI CREATOR</title>
+<style>
+body{margin:0;padding:20px;background:#101827;color:white;font-family:Arial,sans-serif}
+h1{color:#38d9ff}
+.box{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:15px}
+textarea,input,select,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;border-radius:8px;border:none}
+textarea{min-height:90px;resize:vertical}
+button{background:#08a6d9;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6}
+#result,#pluginResult,#smartResult,#plannerResult{white-space:pre-wrap;overflow-wrap:anywhere}
+.status{color:#38d9ff;font-size:14px}
+.secondary{background:#475569}
+.game-screen{background:#111827;border-radius:10px;padding:8px}
+#gameCanvas{width:100%;display:block;background:#87ceeb;border-radius:6px;image-rendering:pixelated;touch-action:none}
+.game-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.game-controls button{padding:16px 4px;font-size:17px;touch-action:none}
+.game-info{font-size:13px;color:#cbd5e1}
+</style>
+</head>
+<body><h1>🚀 NEXTGEN AI CREATOR</h1>
 <p>Your AI Engineering Assistant</p><div class="box">
 <h2>🤖 AI Chat</h2>
 <textarea id="message" placeholder="Ask NEXTGEN AI..."></textarea>
@@ -63,66 +37,78 @@ button:disabled { opacity: 0.6; }
 </div><div class="box">
 <h2>📁 AI File Analysis</h2>
 <p>Upload PDF, DOCX, XLSX, TXT, PPTX or CSV files.</p>
-<input type="file" id="document"
-accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
+<input type="file" id="document" accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
-</div><!-- PROJECT PLANNER --><div class="box">
+</div><div class="box">
 <h2>📋 NEXTGEN PROJECT PLANNER</h2>
-<p>Plan your game, app, website or creative project with AI.</p><label>Project Name:</label>
+<p>Plan your game, app, website or creative project with AI.</p>
+<label>Project Name:</label>
 <input id="plannerName" placeholder="Example: BLOCK WORLD SURVIVAL">
-
 <label>Project Type:</label>
 <select id="plannerType">
-
-<option>Video Game</option>
-<option>Mobile App</option>
-<option>Website</option>
-<option>Software</option>
-<option>Creative Project</option>
-<option>Other</option>
-</select><label>Project Goal:</label>
-
-<textarea id="plannerGoal"
-placeholder="What do you want to create?"></textarea><label>Important Features:</label>
-
-<textarea id="plannerFeatures"
-placeholder="List the features you want..."></textarea><button id="plannerButton" onclick="generateProjectPlan()">
-🧠 Generate AI Project Plan
-</button><p class="status" id="plannerStatus">Ready to plan your project.</p><h3>📝 Your Project Plan</h3>
-<div id="plannerResult">Your project plan will appear here.</div><button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
+<option>Video Game</option><option>Mobile App</option><option>Website</option><option>Software</option><option>Creative Project</option><option>Other</option>
+</select>
+<label>Project Goal:</label>
+<textarea id="plannerGoal" placeholder="What do you want to create?"></textarea>
+<label>Important Features:</label>
+<textarea id="plannerFeatures" placeholder="List the features you want..."></textarea>
+<button id="plannerButton" onclick="generateProjectPlan()">🧠 Generate AI Project Plan</button>
+<p class="status" id="plannerStatus">Ready to plan your project.</p>
+<h3>📝 Your Project Plan</h3>
+<div id="plannerResult">Your project plan will appear here.</div>
+<button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
 <button class="secondary" onclick="loadProjectPlan()">📂 Load Saved Project Plan</button>
-
-</div><!-- SMART ANALYSIS --><div class="box">
+</div><!-- GAME MAKER --><div class="box">
+<h2>🎮 NEXTGEN GAME MAKER</h2>
+<p>Create and play your first block-world game prototype.</p>
+<label>Game Name:</label>
+<input id="gameName" value="BLOCK WORLD SURVIVAL">
+<label>World Type:</label>
+<select id="worldType">
+<option value="grass">🌳 Green Grass World</option>
+<option value="desert">🏜️ Desert World</option>
+<option value="snow">❄️ Snow World</option>
+</select>
+<button onclick="startGame()">▶️ Start Game</button>
+<p class="status" id="gameStatus">Ready to start your game.</p>
+<div class="game-screen">
+<canvas id="gameCanvas" width="640" height="360"></canvas>
+<p class="game-info">Move: Left / Right | Jump: Jump button | Break: Break Block | Place: Place Block</p>
+<div class="game-controls">
+<button id="leftBtn">⬅️ Left</button>
+<button id="rightBtn">➡️ Right</button>
+<button id="jumpBtn">⬆️ Jump</button>
+<button onclick="breakBlock()">⛏️ Break</button>
+</div>
+<button onclick="placeBlock()">🧱 Place Block</button>
+<button class="secondary" onclick="resetGame()">🔄 Reset World</button>
+<p class="game-info" id="gameMessage">Press Start Game to begin.</p>
+</div>
+<p><b>Prototype note:</b> Kini usa pa ka simple 2D block-game prototype. Dili pa kini ang final 3D game.</p>
+</div><div class="box">
 <h2>🧠 NEXTGEN SMART ANALYSIS</h2>
-<p>Test your project concept, identify problems and discover improvements.</p><label>Project Name:</label>
+<p>Test your project concept, identify problems and discover improvements.</p>
+<label>Project Name:</label>
 <input id="projectName" placeholder="Example: BLOCK WORLD SURVIVAL">
-
 <label>Project Type:</label>
 <select id="projectType">
-
-<option value="Video Game">Video Game</option>
-<option value="Mobile App">Mobile App</option>
-<option value="Website">Website</option>
-<option value="Software">Software</option>
-<option value="Creative Project">Creative Project</option>
-<option value="Other">Other</option>
-</select><label>Project Description:</label>
-
-<textarea id="projectDescription"
-placeholder="Describe your project and its features..."></textarea><button id="smartButton" onclick="runSmartAnalysis()">
-🚀 Analyze Project
-</button><p class="status" id="smartStatus">Ready for project analysis.</p><h3>📊 Smart Analysis Results</h3>
+<option value="Video Game">Video Game</option><option value="Mobile App">Mobile App</option><option value="Website">Website</option><option value="Software">Software</option><option value="Creative Project">Creative Project</option><option value="Other">Other</option>
+</select>
+<label>Project Description:</label>
+<textarea id="projectDescription" placeholder="Describe your project and its features..."></textarea>
+<button id="smartButton" onclick="runSmartAnalysis()">🚀 Analyze Project</button>
+<p class="status" id="smartStatus">Ready for project analysis.</p>
+<h3>📊 Smart Analysis Results</h3>
 <div id="smartResult">Your project analysis will appear here.</div>
-</div><!-- PLUGINS --><div class="box">
+</div><div class="box">
 <h2>🧩 NEXTGEN Plugins</h2>
-<p>Choose a plugin and enter your input.</p><label for="plugin">Select Plugin:</label>
+<p>Choose a plugin and enter your input.</p>
+<label for="plugin">Select Plugin:</label>
 <select id="plugin">
-
-<option value="calculator">Calculator</option>
-<option value="text_analyzer">Text Analyzer</option>
-<option value="json_formatter">JSON Formatter</option>
-</select><textarea id="pluginInput" placeholder="Enter your input..."></textarea><button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
-
+<option value="calculator">Calculator</option><option value="text_analyzer">Text Analyzer</option><option value="json_formatter">JSON Formatter</option>
+</select>
+<textarea id="pluginInput" placeholder="Enter your input..."></textarea>
+<button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
 <p class="status" id="pluginStatus">Loading plugins...</p>
 <h3>Plugin Result</h3>
 <div id="pluginResult">Your plugin result will appear here.</div>
@@ -130,335 +116,258 @@ placeholder="Describe your project and its features..."></textarea><button id="s
 <h2>📄 AI Response</h2>
 <div id="result">Welcome to NEXTGEN AI CREATOR!</div>
 </div><script>
-const API = "https://nextgen-ai-engineering.onrender.com";
+const API="https://nextgen-ai-engineering.onrender.com";
 
 // AI CHAT
-async function sendChat() {
-  const message = document.getElementById("message").value;
-  const result = document.getElementById("result");
-
-  if (!message.trim()) {
-    result.textContent = "Please enter a message.";
-    return;
-  }
-
-  result.textContent = "AI is thinking...";
-
-  try {
-    const response = await fetch(API + "/api/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message})
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-    result.textContent = data.reply || JSON.stringify(data);
-  } catch (error) {
-    result.textContent = "Error: " + error.message;
-  }
+async function sendChat(){
+ const message=document.getElementById("message").value;
+ const result=document.getElementById("result");
+ if(!message.trim()){result.textContent="Please enter a message.";return}
+ result.textContent="AI is thinking...";
+ try{
+  const response=await fetch(API+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
+  const data=await response.json();
+  if(!response.ok)throw new Error(JSON.stringify(data));
+  result.textContent=data.reply||JSON.stringify(data);
+ }catch(error){result.textContent="Error: "+error.message}
 }
 
 // IMAGE ANALYSIS
-async function analyzeImage() {
-  const file = document.getElementById("image").files[0];
-  const prompt = document.getElementById("prompt").value;
-  const result = document.getElementById("result");
-
-  if (!file) {
-    result.textContent = "Please choose an image first.";
-    return;
-  }
-
-  result.textContent = "Analyzing image...";
-
-  const form = new FormData();
-  form.append("image", file);
-  form.append("prompt", prompt);
-
-  try {
-    const response = await fetch(API + "/api/analyze-image", {
-      method: "POST",
-      body: form
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-    result.textContent = data.reply || JSON.stringify(data);
-  } catch (error) {
-    result.textContent = "Error: " + error.message;
-  }
+async function analyzeImage(){
+ const file=document.getElementById("image").files[0];
+ const prompt=document.getElementById("prompt").value;
+ const result=document.getElementById("result");
+ if(!file){result.textContent="Please choose an image first.";return}
+ result.textContent="Analyzing image...";
+ const form=new FormData();form.append("image",file);form.append("prompt",prompt);
+ try{
+  const response=await fetch(API+"/api/analyze-image",{method:"POST",body:form});
+  const data=await response.json();
+  if(!response.ok)throw new Error(JSON.stringify(data));
+  result.textContent=data.reply||JSON.stringify(data);
+ }catch(error){result.textContent="Error: "+error.message}
 }
 
 // FILE ANALYSIS
-async function analyzeFile() {
-  const file = document.getElementById("document").files[0];
-  const result = document.getElementById("result");
-
-  if (!file) {
-    result.textContent = "Please choose a file first.";
-    return;
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    result.textContent = "File is too large. Maximum size is 10 MB.";
-    return;
-  }
-
-  result.textContent = "Analyzing file... Please wait.";
-
-  const form = new FormData();
-  form.append("file", file);
-
-  try {
-    const response = await fetch(API + "/api/analyze-file", {
-      method: "POST",
-      body: form
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-    result.textContent = data.reply || JSON.stringify(data);
-  } catch (error) {
-    result.textContent = "File analysis error: " + error.message;
-  }
+async function analyzeFile(){
+ const file=document.getElementById("document").files[0];
+ const result=document.getElementById("result");
+ if(!file){result.textContent="Please choose a file first.";return}
+ if(file.size>10*1024*1024){result.textContent="File is too large. Maximum size is 10 MB.";return}
+ result.textContent="Analyzing file... Please wait.";
+ const form=new FormData();form.append("file",file);
+ try{
+  const response=await fetch(API+"/api/analyze-file",{method:"POST",body:form});
+  const data=await response.json();
+  if(!response.ok)throw new Error(JSON.stringify(data));
+  result.textContent=data.reply||JSON.stringify(data);
+ }catch(error){result.textContent="File analysis error: "+error.message}
 }
 
 // PROJECT PLANNER
-async function generateProjectPlan() {
-  const name = document.getElementById("plannerName").value.trim();
-  const type = document.getElementById("plannerType").value;
-  const goal = document.getElementById("plannerGoal").value.trim();
-  const features = document.getElementById("plannerFeatures").value.trim();
-
-  const output = document.getElementById("plannerResult");
-  const status = document.getElementById("plannerStatus");
-  const button = document.getElementById("plannerButton");
-
-  if (!name || !goal || !features) {
-    output.textContent = "Please complete the project name, goal and features.";
-    return;
-  }
-
-  button.disabled = true;
-  status.textContent = "AI is creating your project plan...";
-  output.textContent = "Please wait...";
-
-  const message = `
-Create a practical development plan for this project.
-
-Project name: ${name}
-Project type: ${type}
-Project goal: ${goal}
-Important features: ${features}
-
-Include:
-1. Project overview
-2. Main features
-3. Development phases in order
-4. Tools and technology suggestions, prioritizing free tools
-5. Testing plan
-6. Important risks and solutions
-7. First tasks to start with
-
-Be realistic. Separate features that can be built now from future features.
-`;
-
-  try {
-    const response = await fetch(API + "/api/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message})
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-
-    output.textContent = data.reply || JSON.stringify(data);
-    status.textContent = "✅ Project plan generated!";
-
-  } catch (error) {
-    output.textContent = "Planner error: " + error.message;
-    status.textContent = "Could not generate the plan.";
-  } finally {
-    button.disabled = false;
-  }
+async function generateProjectPlan(){
+ const name=document.getElementById("plannerName").value.trim();
+ const type=document.getElementById("plannerType").value;
+ const goal=document.getElementById("plannerGoal").value.trim();
+ const features=document.getElementById("plannerFeatures").value.trim();
+ const output=document.getElementById("plannerResult");
+ const status=document.getElementById("plannerStatus");
+ const button=document.getElementById("plannerButton");
+ if(!name||!goal||!features){output.textContent="Please complete the project name, goal and features.";return}
+ button.disabled=true;status.textContent="AI is creating your project plan...";output.textContent="Please wait...";
+ const message=`Create a practical development plan.\nProject name: ${name}\nProject type: ${type}\nProject goal: ${goal}\nImportant features: ${features}\nInclude overview, main features, development phases, free tools, testing plan, risks and first tasks. Separate current work from future features.`;
+ try{
+  const response=await fetch(API+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message})});
+  const data=await response.json();if(!response.ok)throw new Error(JSON.stringify(data));
+  output.textContent=data.reply||JSON.stringify(data);status.textContent="✅ Project plan generated!";
+ }catch(error){output.textContent="Planner error: "+error.message;status.textContent="Could not generate the plan."}
+ finally{button.disabled=false}
 }
-
-// SAVE PROJECT PLAN ON PHONE
-function saveProjectPlan() {
-  const name = document.getElementById("plannerName").value.trim();
-  const type = document.getElementById("plannerType").value;
-  const goal = document.getElementById("plannerGoal").value;
-  const features = document.getElementById("plannerFeatures").value;
-  const plan = document.getElementById("plannerResult").textContent;
-
-  if (!name || !plan || plan === "Your project plan will appear here.") {
-    alert("Please generate a project plan first.");
-    return;
-  }
-
-  const saved = {
-    name,
-    type,
-    goal,
-    features,
-    plan,
-    savedAt: new Date().toLocaleString()
-  };
-
-  try {
-    localStorage.setItem("NEXTGEN_PROJECT_PLAN", JSON.stringify(saved));
-    document.getElementById("plannerStatus").textContent =
-      "✅ Project plan saved on this phone!";
-  } catch (error) {
-    alert("Could not save the project plan: " + error.message);
-  }
+function saveProjectPlan(){
+ const name=document.getElementById("plannerName").value.trim();
+ const plan=document.getElementById("plannerResult").textContent;
+ if(!name||!plan||plan==="Your project plan will appear here."){alert("Please generate a project plan first.");return}
+ const saved={name,type:document.getElementById("plannerType").value,goal:document.getElementById("plannerGoal").value,features:document.getElementById("plannerFeatures").value,plan,savedAt:new Date().toLocaleString()};
+ try{localStorage.setItem("NEXTGEN_PROJECT_PLAN",JSON.stringify(saved));document.getElementById("plannerStatus").textContent="✅ Project plan saved on this phone!"}
+ catch(error){alert("Could not save: "+error.message)}
 }
-
-// LOAD SAVED PROJECT PLAN
-function loadProjectPlan() {
-  const output = document.getElementById("plannerResult");
-
-  try {
-    const saved = localStorage.getItem("NEXTGEN_PROJECT_PLAN");
-
-    if (!saved) {
-      alert("No saved project plan found on this phone.");
-      return;
-    }
-
-    const data = JSON.parse(saved);
-
-    document.getElementById("plannerName").value = data.name || "";
-    document.getElementById("plannerType").value = data.type || "Video Game";
-    document.getElementById("plannerGoal").value = data.goal || "";
-    document.getElementById("plannerFeatures").value = data.features || "";
-    output.textContent = data.plan || "";
-
-    document.getElementById("plannerStatus").textContent =
-      "Loaded saved project plan. Saved: " + (data.savedAt || "Unknown");
-  } catch (error) {
-    alert("Could not load the saved plan: " + error.message);
-  }
+function loadProjectPlan(){
+ const output=document.getElementById("plannerResult");
+ try{
+  const saved=localStorage.getItem("NEXTGEN_PROJECT_PLAN");
+  if(!saved){alert("No saved project plan found.");return}
+  const data=JSON.parse(saved);
+  document.getElementById("plannerName").value=data.name||"";
+  document.getElementById("plannerType").value=data.type||"Video Game";
+  document.getElementById("plannerGoal").value=data.goal||"";
+  document.getElementById("plannerFeatures").value=data.features||"";
+  output.textContent=data.plan||"";
+  document.getElementById("plannerStatus").textContent="Loaded saved project plan. Saved: "+(data.savedAt||"Unknown");
+ }catch(error){alert("Could not load: "+error.message)}
 }
 
 // SMART ANALYSIS
-async function runSmartAnalysis() {
-  const project_name = document.getElementById("projectName").value.trim();
-  const project_type = document.getElementById("projectType").value;
-  const description = document.getElementById("projectDescription").value.trim();
-
-  const output = document.getElementById("smartResult");
-  const status = document.getElementById("smartStatus");
-  const button = document.getElementById("smartButton");
-
-  if (!project_name || !description) {
-    output.textContent = "Please enter your project name and description.";
-    return;
-  }
-
-  button.disabled = true;
-  status.textContent = "NEXTGEN AI is analyzing your project...";
-  output.textContent = "Please wait. Smart Analysis is running...";
-
-  try {
-    const response = await fetch(API + "/api/smart-analysis", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        project_name,
-        project_type,
-        description
-      })
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-
-    output.textContent = data.analysis || "No analysis received.";
-    status.textContent = "✅ Analysis completed successfully!";
-
-  } catch (error) {
-    output.textContent = "Smart Analysis error: " + error.message;
-    status.textContent = "Analysis failed. Please try again.";
-  } finally {
-    button.disabled = false;
-  }
+async function runSmartAnalysis(){
+ const project_name=document.getElementById("projectName").value.trim();
+ const project_type=document.getElementById("projectType").value;
+ const description=document.getElementById("projectDescription").value.trim();
+ const output=document.getElementById("smartResult");
+ const status=document.getElementById("smartStatus");
+ const button=document.getElementById("smartButton");
+ if(!project_name||!description){output.textContent="Please enter your project name and description.";return}
+ button.disabled=true;status.textContent="NEXTGEN AI is analyzing your project...";output.textContent="Please wait...";
+ try{
+  const response=await fetch(API+"/api/smart-analysis",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_name,project_type,description})});
+  const data=await response.json();if(!response.ok)throw new Error(JSON.stringify(data));
+  output.textContent=data.analysis||"No analysis received.";status.textContent="✅ Analysis completed successfully!";
+ }catch(error){output.textContent="Smart Analysis error: "+error.message;status.textContent="Analysis failed. Please try again."}
+ finally{button.disabled=false}
 }
 
-// LOAD PLUGINS
-async function loadPlugins() {
-  const status = document.getElementById("pluginStatus");
-
-  try {
-    const response = await fetch(API + "/api/plugins");
-    const data = await response.json();
-
-    if (!response.ok) throw new Error("Could not load plugins.");
-
-    const select = document.getElementById("plugin");
-    select.innerHTML = "";
-
-    data.plugins.forEach(item => {
-      const option = document.createElement("option");
-      option.value = item.id;
-      option.textContent = item.name;
-      select.appendChild(option);
-    });
-
-    status.textContent = data.plugins.length + " plugins available.";
-  } catch (error) {
-    status.textContent = "Plugin loading error: " + error.message;
-  }
+// PLUGINS
+async function loadPlugins(){
+ const status=document.getElementById("pluginStatus");
+ try{
+  const response=await fetch(API+"/api/plugins");const data=await response.json();
+  if(!response.ok)throw new Error("Could not load plugins.");
+  const select=document.getElementById("plugin");select.innerHTML="";
+  data.plugins.forEach(item=>{const option=document.createElement("option");option.value=item.id;option.textContent=item.name;select.appendChild(option)});
+  status.textContent=data.plugins.length+" plugins available.";
+ }catch(error){status.textContent="Plugin loading error: "+error.message}
+}
+async function runPlugin(){
+ const plugin=document.getElementById("plugin").value;
+ const input=document.getElementById("pluginInput").value;
+ const output=document.getElementById("pluginResult");
+ const button=document.getElementById("runPluginButton");
+ if(!input.trim()){output.textContent="Please enter some input first.";return}
+ button.disabled=true;output.textContent="Running plugin...";
+ try{
+  const response=await fetch(API+"/api/plugins/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plugin,input})});
+  const data=await response.json();if(!response.ok)throw new Error(JSON.stringify(data));
+  output.textContent=JSON.stringify(data,null,2);
+ }catch(error){output.textContent="Plugin error: "+error.message}
+ finally{button.disabled=false}
 }
 
-// RUN PLUGIN
-async function runPlugin() {
-  const plugin = document.getElementById("plugin").value;
-  const input = document.getElementById("pluginInput").value;
-  const output = document.getElementById("pluginResult");
-  const button = document.getElementById("runPluginButton");
+// SIMPLE PLAYABLE BLOCK WORLD PROTOTYPE
+const canvas=document.getElementById("gameCanvas");
+const ctx=canvas.getContext("2d");
+const TILE=32,COLS=20,ROWS=11;
+let world=[],player={x:3,y:5,vx:0,vy:0,w:22,h:28,onGround:false};
+let running=false,worldTheme="grass",cameraX=0;
+let keys={left:false,right:false};
+let gameLoop=null;
 
-  if (!input.trim()) {
-    output.textContent = "Please enter some input first.";
-    return;
+function createWorld(){
+ world=[];
+ for(let y=0;y<ROWS;y++){
+  world[y]=[];
+  for(let x=0;x<COLS;x++){
+   if(y>=8)world[y][x]=y===8?"grass":"dirt";
+   else world[y][x]=null;
   }
-
-  button.disabled = true;
-  output.textContent = "Running plugin... Please wait.";
-
-  try {
-    const response = await fetch(API + "/api/plugins/run", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({plugin, input})
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
-
-    output.textContent = JSON.stringify(data, null, 2);
-  } catch (error) {
-    output.textContent = "Plugin error: " + error.message;
-  } finally {
-    button.disabled = false;
-  }
+ }
+ // small hills and blocks
+ world[7][7]="grass";world[6][7]="dirt";
+ world[7][12]="grass";world[7][13]="grass";
+ player={x:3*TILE,y:5*TILE,vx:0,vy:0,w:22,h:28,onGround:false};
+ cameraX=0;
 }
+function startGame(){
+ worldTheme=document.getElementById("worldType").value;
+ createWorld();running=true;
+ document.getElementById("gameStatus").textContent="🎮 Game started!";
+ document.getElementById("gameMessage").textContent="Explore your block world!";
+ if(gameLoop)cancelAnimationFrame(gameLoop);
+ gameLoop=requestAnimationFrame(updateGame);
+}
+function resetGame(){startGame()}
+function tileColor(type){
+ if(type==="grass")return worldTheme==="desert"?"#d6b65c":worldTheme==="snow"?"#eaf5ff":"#43a047";
+ if(type==="dirt")return worldTheme==="desert"?"#a8783e":worldTheme==="snow"?"#b8c8d8":"#795548";
+ return "#777";
+}
+function solidAt(px,py){
+ const x=Math.floor(px/TILE),y=Math.floor(py/TILE);
+ return y>=ROWS||x<0||x>=COLS||(y>=0&&world[y]&&world[y][x]);
+}
+function updateGame(){
+ if(!running)return;
+ player.vx=keys.left?-3:keys.right?3:0;
+ player.x+=player.vx;
+ if(player.x<0)player.x=0;
+ if(player.x>COLS*TILE-player.w)player.x=COLS*TILE-player.w;
+ player.vy+=0.55;
+ if(player.vy>9)player.vy=9;
+ player.y+=player.vy;
+ player.onGround=false;
+ if(solidAt(player.x+2,player.y+player.h)||solidAt(player.x+player.w-2,player.y+player.h)){
+  player.y=Math.floor((player.y+player.h)/TILE)*TILE-player.h;
+  player.vy=0;player.onGround=true;
+ }
+ if(player.y>ROWS*TILE){player.y=5*TILE;player.vy=0}
+ drawGame();
+ gameLoop=requestAnimationFrame(updateGame);
+}
+function drawGame(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ const sky=ctx.createLinearGradient(0,0,0,canvas.height);
+ sky.addColorStop(0,worldTheme==="snow"?"#b9d9f5":worldTheme==="desert"?"#f2c879":"#75c9f2");
+ sky.addColorStop(1,"#e5f5ff");ctx.fillStyle=sky;ctx.fillRect(0,0,canvas.width,canvas.height);
+ // sun
+ ctx.fillStyle="#ffe082";ctx.beginPath();ctx.arc(535,55,23,0,Math.PI*2);ctx.fill();
+ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+  const block=world[y][x];if(!block)continue;
+  const sx=x*TILE-cameraX,sy=y*TILE;
+  ctx.fillStyle=tileColor(block);ctx.fillRect(sx,sy,TILE,TILE);
+  ctx.strokeStyle="rgba(0,0,0,.18)";ctx.strokeRect(sx,sy,TILE,TILE);
+  if(block==="grass"){ctx.fillStyle="#80d66b";ctx.fillRect(sx,sy,TILE,5)}
+ }
+ // player
+ const px=player.x-cameraX,py=player.y;
+ ctx.fillStyle="#2563eb";ctx.fillRect(px,py+10,player.w,18);
+ ctx.fillStyle="#f2c9a0";ctx.fillRect(px+3,py,16,13);
+ ctx.fillStyle="#222";ctx.fillRect(px+6,py+5,3,3);ctx.fillRect(px+15,py+5,3,3);
+ ctx.fillStyle="#111827";ctx.fillRect(px+2,py+25,7,5);ctx.fillRect(px+14,py+25,7,5);
+ ctx.fillStyle="white";ctx.font="14px Arial";ctx.fillText("BLOCK WORLD SURVIVAL",12,22);
+}
+function jump(){
+ if(running&&player.onGround){player.vy=-10;player.onGround=false}
+}
+function targetBlock(){
+ const tx=Math.floor((player.x+player.w/2)/TILE);
+ const ty=Math.floor((player.y+player.h/2)/TILE);
+ return {x:Math.min(COLS-1,Math.max(0,tx+1)),y:Math.min(ROWS-1,Math.max(0,ty))};
+}
+function breakBlock(){
+ if(!running)return;
+ const t=targetBlock();
+ if(world[t.y][t.x]){world[t.y][t.x]=null;document.getElementById("gameMessage").textContent="Block broken!"}
+ else document.getElementById("gameMessage").textContent="No block there. Move near a block.";
+}
+function placeBlock(){
+ if(!running)return;
+ const t=targetBlock();
+ if(!world[t.y][t.x]){world[t.y][t.x]="dirt";document.getElementById("gameMessage").textContent="Block placed!"}
+ else document.getElementById("gameMessage").textContent="That space is occupied.";
+}
+function bindHold(id,key){
+ const el=document.getElementById(id);
+ el.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});
+ ["pointerup","pointerleave","pointercancel"].forEach(ev=>el.addEventListener(ev,()=>keys[key]=false));
+}
+bindHold("leftBtn","left");bindHold("rightBtn","right");
+document.getElementById("jumpBtn").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
+createWorld();drawGame();
 
-// INITIALIZE
 loadPlugins();
 
-// SERVICE WORKER
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      await navigator.serviceWorker.register("./service-worker.js");
-      console.log("NEXTGEN service worker registered.");
-    } catch (error) {
-      console.error("Service worker registration failed:", error);
-    }
-  });
+if("serviceWorker" in navigator){
+ window.addEventListener("load",async()=>{
+  try{await navigator.serviceWorker.register("./service-worker.js");console.log("NEXTGEN service worker registered.")}
+  catch(error){console.error("Service worker registration failed:",error)}
+ });
 }
 </script></body>
 </html>

@@ -104,7 +104,7 @@ async def chat(data: ChatRequest):
 @app.post("/api/analyze-image")
 async def analyze_image(
     image: UploadFile = File(...),
-    prompt: str = Form("Describe and analyze this image.")
+    prompt: str = Form("prompt: str = Form("Describe this image clearly and briefly.")
 ):
 
     api_key = os.getenv("GROQ_API_KEY")

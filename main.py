@@ -2,6 +2,9 @@ import os
 import base64
 import csv
 import httpx
+import ast
+import operator
+import json
 
 from io import BytesIO, StringIO
 from pypdf import PdfReader
@@ -32,11 +35,21 @@ class ChatRequest(BaseModel):
     message: str
 
 
+class PluginRequest(BaseModel):
+    plugin: str
+    input: str
+
+
+# =====================================
+# HOME AND HEALTH
+# =====================================
+
 @app.get("/")
 def home():
     return {
         "name": "NEXTGEN AI BRAIN",
-        "status": "online"
+        "status": "online",
+        "plugins": True
     }
 
 
@@ -44,6 +57,10 @@ def home():
 def health():
     return {"status": "healthy"}
 
+
+# =====================================
+# AI CHAT
+# =====================================
 
 @app.post("/api/chat")
 async def chat(data: ChatRequest):
@@ -111,6 +128,10 @@ async def chat(data: ChatRequest):
             "Could not connect to AI provider"
         )
 
+
+# =====================================
+# AI IMAGE ANALYSIS
+# =====================================
 
 @app.post("/api/analyze-image")
 async def analyze_image(
@@ -213,6 +234,10 @@ async def analyze_image(
             "Could not connect to image AI provider"
         )
 
+
+# =====================================
+# AI FILE ANALYSIS
+# =====================================
 
 @app.post("/api/analyze-file")
 async def analyze_file(file: UploadFile = File(...)):
@@ -396,4 +421,167 @@ async def analyze_file(file: UploadFile = File(...)):
         raise HTTPException(
             503,
             "Could not connect to AI provider"
+        )
+
+
+# =====================================
+# NEXTGEN AI PLUGINS
+# =====================================
+
+@app.get("/api/plugins")
+def list_plugins():
+
+    return {
+        "plugins": [
+            {
+                "id": "calculator",
+                "name": "Calculator",
+                "description": "Perform mathematical calculations."
+            },
+            {
+                "id": "text_analyzer",
+                "name": "Text Analyzer",
+                "description": "Count words, characters and lines."
+            },
+            {
+                "id": "json_formatter",
+                "name": "JSON Formatter",
+                "description": "Format and validate JSON data."
+            }
+        ]
+    }
+
+
+@app.post("/api/plugins/run")
+def run_plugin(data: PluginRequest):
+
+    if len(data.input) > 10000:
+        raise HTTPException(
+            413,
+            "Plugin input is too large."
+        )
+
+    # -----------------------------
+    # CALCULATOR PLUGIN
+    # -----------------------------
+
+    if data.plugin == "calculator":
+
+        allowed_operators = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.Pow: operator.pow,
+            ast.Mod: operator.mod,
+            ast.USub: operator.neg,
+            ast.UAdd: operator.pos
+        }
+
+        def calculate(node):
+
+            if isinstance(node, ast.Constant):
+                if type(node.value) not in (int, float):
+                    raise ValueError("Only numbers are allowed.")
+
+                if abs(node.value) > 1000000000:
+                    raise ValueError("Number is too large.")
+
+                return node.value
+
+            if isinstance(node, ast.BinOp):
+
+                op = allowed_operators.get(type(node.op))
+
+                if op is None:
+                    raise ValueError("Unsupported operation.")
+
+                left = calculate(node.left)
+                right = calculate(node.right)
+
+                if isinstance(node.op, ast.Pow):
+                    if abs(right) > 10:
+                        raise ValueError("Exponent is too large.")
+
+                answer = op(left, right)
+
+                if abs(answer) > 1e100:
+                    raise ValueError("Result is too large.")
+
+                return answer
+
+            if isinstance(node, ast.UnaryOp):
+
+                op = allowed_operators.get(type(node.op))
+
+                if op is None:
+                    raise ValueError("Unsupported operation.")
+
+                return op(calculate(node.operand))
+
+            raise ValueError("Invalid mathematical expression.")
+
+        try:
+
+            if not data.input.strip():
+                raise ValueError("Enter a calculation first.")
+
+            tree = ast.parse(data.input, mode="eval")
+            answer = calculate(tree.body)
+
+            return {
+                "plugin": "calculator",
+                "result": answer
+            }
+
+        except Exception as error:
+            raise HTTPException(400, str(error))
+
+    # -----------------------------
+    # TEXT ANALYZER PLUGIN
+    # -----------------------------
+
+    elif data.plugin == "text_analyzer":
+
+        text = data.input
+
+        return {
+            "plugin": "text_analyzer",
+            "characters": len(text),
+            "words": len(text.split()),
+            "lines": len(text.splitlines())
+        }
+
+    # -----------------------------
+    # JSON FORMATTER PLUGIN
+    # -----------------------------
+
+    elif data.plugin == "json_formatter":
+
+        try:
+
+            parsed = json.loads(data.input)
+
+            return {
+                "plugin": "json_formatter",
+                "valid": True,
+                "result": json.dumps(
+                    parsed,
+                    indent=2,
+                    ensure_ascii=False
+                )
+            }
+
+        except json.JSONDecodeError as error:
+
+            raise HTTPException(
+                400,
+                f"Invalid JSON: {error}"
+            )
+
+    else:
+
+        raise HTTPException(
+            404,
+            "Plugin not found."
         )

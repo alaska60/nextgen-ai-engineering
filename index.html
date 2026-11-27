@@ -20,31 +20,29 @@ button:disabled{opacity:.6}
 .game-screen{background:#111827;border-radius:10px;padding:8px}
 #gameCanvas{width:100%;display:block;background:#87ceeb;border-radius:6px;image-rendering:pixelated;touch-action:none}
 .game-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.game-controls button{padding:16px 4px;font-size:16px;touch-action:none}
-.game-info{font-size:13px;color:#cbd5e1}
+.game-controls button{padding:16px 4px;font-size:16px;touch-action:none;user-select:none;-webkit-user-select:none}
 .hidden{display:none}
 </style></head><body><h1>🚀 NEXTGEN AI CREATOR</h1>
-<p>Your AI Engineering Assistant</p><!-- BLOCK WORLD SURVIVAL MAIN MENU --><div class="box" id="mainMenu">
+<p>Your AI Engineering Assistant</p><!-- MAIN MENU --><div class="box" id="mainMenu">
 <h2>🌍 BLOCK WORLD SURVIVAL</h2>
-<p>Welcome to your block world adventure!</p><button class="menu-button" onclick="openPlay()">▶️ Play</button>
+<p>Welcome to your block world adventure!</p>
+<button class="menu-button" onclick="openPlay()">▶️ Play</button>
 <button class="menu-button" onclick="showScreen('createScreen')">🌍 Create World</button>
 <button class="menu-button" onclick="showScreen('serversScreen')">🌐 Servers</button>
 <button class="menu-button" onclick="showScreen('friendsScreen')">👥 Friends</button>
 <button class="menu-button" onclick="showScreen('settingsScreen')">⚙️ Settings</button>
-
 </div><!-- CREATE WORLD --><div class="box hidden" id="createScreen">
-<h2>🌍 Create World</h2><label>World Name:</label>
+<h2>🌍 Create World</h2>
+<label>World Name:</label>
 <input id="newWorldName" value="My Survival World">
-
 <label>World Type:</label>
 <select id="newWorldType">
-
 <option value="grass">🌳 Green Grass World</option>
 <option value="desert">🏜️ Desert World</option>
 <option value="snow">❄️ Snow World</option>
-</select><button onclick="createNewWorld()">🌍 Create and Play</button>
+</select>
+<button onclick="createNewWorld()">🌍 Create and Play</button>
 <button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
-
 <p class="status" id="createStatus">Choose your world settings.</p>
 </div><!-- SERVERS --><div class="box hidden" id="serversScreen">
 <h2>🌐 Servers</h2>
@@ -57,18 +55,19 @@ button:disabled{opacity:.6}
 <p class="status">Current status: Friends system not connected yet.</p>
 <button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
 </div><!-- SETTINGS --><div class="box hidden" id="settingsScreen">
-<h2>⚙️ Settings</h2><label>Graphics Quality (prototype setting):</label>
+<h2>⚙️ Settings</h2>
+<label>Graphics Quality:</label>
 <select id="graphicsSetting">
-
 <option>Low</option>
 <option selected>Medium</option>
 <option>High</option>
-</select><label>Frame Rate Preference:</label>
+</select>
+<label>Frame Rate Preference:</label>
 <select id="fpsSetting">
-
 <option>30 FPS</option>
 <option>60 FPS</option>
-</select><p class="status">These are preview settings. They do not yet change the game's graphics engine.</p>
+</select>
+<p class="status">Preview settings only. These do not yet change the graphics engine.</p>
 <button class="secondary" onclick="showScreen('mainMenu')">⬅️ Back to Menu</button>
 </div><!-- AI CHAT --><div class="box">
 <h2>🤖 AI Chat</h2>
@@ -85,43 +84,43 @@ button:disabled{opacity:.6}
 <input type="file" id="document" accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
 </div><!-- PROJECT PLANNER --><div class="box">
-<h2>📋 NEXTGEN PROJECT PLANNER</h2><label>Project Name:</label>
+<h2>📋 NEXTGEN PROJECT PLANNER</h2>
+<label>Project Name:</label>
 <input id="plannerName" placeholder="Example: BLOCK WORLD SURVIVAL">
-
 <label>Project Type:</label>
 <select id="plannerType">
-
 <option>Video Game</option>
 <option>Mobile App</option>
 <option>Website</option>
 <option>Software</option>
 <option>Creative Project</option>
 <option>Other</option>
-</select><label>Project Goal:</label>
-
-<textarea id="plannerGoal" placeholder="What do you want to create?"></textarea><label>Important Features:</label>
-
-<textarea id="plannerFeatures" placeholder="List the features you want..."></textarea><button id="plannerButton" onclick="generateProjectPlan()">🧠 Generate AI Project Plan</button>
-
-<p class="status" id="plannerStatus">Ready to plan your project.</p><h3>📝 Your Project Plan</h3>
-<div id="plannerResult">Your project plan will appear here.</div><button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
+</select>
+<label>Project Goal:</label>
+<textarea id="plannerGoal" placeholder="What do you want to create?"></textarea>
+<label>Important Features:</label>
+<textarea id="plannerFeatures" placeholder="List the features you want..."></textarea>
+<button id="plannerButton" onclick="generateProjectPlan()">🧠 Generate AI Project Plan</button>
+<p class="status" id="plannerStatus">Ready to plan your project.</p>
+<h3>📝 Your Project Plan</h3>
+<div id="plannerResult">Your project plan will appear here.</div>
+<button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
 <button class="secondary" onclick="loadProjectPlan()">📂 Load Saved Project Plan</button>
-
 </div><!-- GAME MAKER --><div class="box" id="gameMaker">
 <h2>🎮 NEXTGEN GAME MAKER</h2>
-<p>Create and play your block-world game prototype.</p><label>Game Name:</label>
+<p>Create and play your block-world game prototype.</p>
+<label>Game Name:</label>
 <input id="gameName" value="BLOCK WORLD SURVIVAL">
-
 <label>World Type:</label>
 <select id="worldType">
-
 <option value="grass">🌳 Green Grass World</option>
 <option value="desert">🏜️ Desert World</option>
 <option value="snow">❄️ Snow World</option>
-</select><button onclick="startGame()">▶️ Start Game</button>
-
+</select>
+<button onclick="startGame()">▶️ Start Game</button>
 <p class="status" id="gameStatus">Ready to start your game.</p><div class="game-screen">
-<canvas id="gameCanvas" width="640" height="360"></canvas><p class="game-info">Move: Left / Right | Jump: Jump button | Break: Break Block | Place: Place Block</p><div class="game-controls">
+<canvas id="gameCanvas" width="640" height="360"></canvas>
+<p class="game-info">Hold Left or Right to move. Tap Jump once to jump.</p><div class="game-controls">
 <button id="leftBtn">⬅️ Left</button>
 <button id="rightBtn">➡️ Right</button>
 <button id="jumpBtn">⬆️ Jump</button>
@@ -134,34 +133,34 @@ button:disabled{opacity:.6}
 <button class="secondary" onclick="showScreen('mainMenu')">🏠 Main Menu</button>
 </div><!-- SMART ANALYSIS --><div class="box">
 <h2>🧠 NEXTGEN SMART ANALYSIS</h2>
-<p>Test your project concept and discover improvements.</p><label>Project Name:</label>
+<p>Test your project concept and discover improvements.</p>
+<label>Project Name:</label>
 <input id="projectName" placeholder="Example: BLOCK WORLD SURVIVAL">
-
 <label>Project Type:</label>
 <select id="projectType">
-
 <option value="Video Game">Video Game</option>
 <option value="Mobile App">Mobile App</option>
 <option value="Website">Website</option>
 <option value="Software">Software</option>
 <option value="Creative Project">Creative Project</option>
 <option value="Other">Other</option>
-</select><label>Project Description:</label>
-
-<textarea id="projectDescription" placeholder="Describe your project and its features..."></textarea><button id="smartButton" onclick="runSmartAnalysis()">🚀 Analyze Project</button>
-
+</select>
+<label>Project Description:</label>
+<textarea id="projectDescription" placeholder="Describe your project and its features..."></textarea>
+<button id="smartButton" onclick="runSmartAnalysis()">🚀 Analyze Project</button>
 <p class="status" id="smartStatus">Ready for project analysis.</p>
 <h3>📊 Smart Analysis Results</h3>
 <div id="smartResult">Your project analysis will appear here.</div>
 </div><!-- PLUGINS --><div class="box">
-<h2>🧩 NEXTGEN Plugins</h2><label>Select Plugin:</label>
+<h2>🧩 NEXTGEN Plugins</h2>
+<label>Select Plugin:</label>
 <select id="plugin">
-
 <option value="calculator">Calculator</option>
 <option value="text_analyzer">Text Analyzer</option>
 <option value="json_formatter">JSON Formatter</option>
-</select><textarea id="pluginInput" placeholder="Enter your input..."></textarea><button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
-
+</select>
+<textarea id="pluginInput" placeholder="Enter your input..."></textarea>
+<button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
 <p class="status" id="pluginStatus">Loading plugins...</p>
 <h3>Plugin Result</h3>
 <div id="pluginResult">Your plugin result will appear here.</div>
@@ -171,7 +170,7 @@ button:disabled{opacity:.6}
 </div><script>
 const API="https://nextgen-ai-engineering.onrender.com";
 
-// MENU NAVIGATION
+// MENU
 function showScreen(id){
  document.querySelectorAll("#createScreen,#serversScreen,#friendsScreen,#settingsScreen,#mainMenu")
  .forEach(el=>el.classList.add("hidden"));
@@ -186,15 +185,13 @@ function openPlay(){
 function createNewWorld(){
  const name=document.getElementById("newWorldName").value.trim();
  const type=document.getElementById("newWorldType").value;
-
  if(!name){
   document.getElementById("createStatus").textContent="Please enter a world name.";
   return;
  }
-
  document.getElementById("gameName").value=name;
  document.getElementById("worldType").value=type;
- document.getElementById("createStatus").textContent="World created! Starting your world...";
+ document.getElementById("createStatus").textContent="World created! Starting...";
  startGame();
  openPlay();
 }
@@ -203,10 +200,8 @@ function createNewWorld(){
 async function sendChat(){
  const message=document.getElementById("message").value;
  const result=document.getElementById("result");
-
  if(!message.trim()){result.textContent="Please enter a message.";return;}
  result.textContent="AI is thinking...";
-
  try{
   const response=await fetch(API+"/api/chat",{
    method:"POST",headers:{"Content-Type":"application/json"},
@@ -223,14 +218,11 @@ async function analyzeImage(){
  const file=document.getElementById("image").files[0];
  const prompt=document.getElementById("prompt").value;
  const result=document.getElementById("result");
-
  if(!file){result.textContent="Please choose an image first.";return;}
  result.textContent="Analyzing image...";
-
  const form=new FormData();
  form.append("image",file);
  form.append("prompt",prompt);
-
  try{
   const response=await fetch(API+"/api/analyze-image",{method:"POST",body:form});
   const data=await response.json();
@@ -243,14 +235,11 @@ async function analyzeImage(){
 async function analyzeFile(){
  const file=document.getElementById("document").files[0];
  const result=document.getElementById("result");
-
  if(!file){result.textContent="Please choose a file first.";return;}
  if(file.size>10*1024*1024){result.textContent="Maximum file size is 10 MB.";return;}
-
  result.textContent="Analyzing file... Please wait.";
  const form=new FormData();
  form.append("file",file);
-
  try{
   const response=await fetch(API+"/api/analyze-file",{method:"POST",body:form});
   const data=await response.json();
@@ -268,20 +257,16 @@ async function generateProjectPlan(){
  const output=document.getElementById("plannerResult");
  const status=document.getElementById("plannerStatus");
  const button=document.getElementById("plannerButton");
-
  if(!name||!goal||!features){output.textContent="Please complete the project name, goal and features.";return;}
-
  button.disabled=true;
  status.textContent="AI is creating your project plan...";
  output.textContent="Please wait...";
-
  const message=`Create a practical development plan.
 Project name: ${name}
 Project type: ${type}
 Project goal: ${goal}
 Important features: ${features}
 Include overview, main features, development phases, free tools, testing plan, risks and first tasks. Separate current work from future features.`;
-
  try{
   const response=await fetch(API+"/api/chat",{
    method:"POST",headers:{"Content-Type":"application/json"},
@@ -300,11 +285,9 @@ Include overview, main features, development phases, free tools, testing plan, r
 function saveProjectPlan(){
  const name=document.getElementById("plannerName").value.trim();
  const plan=document.getElementById("plannerResult").textContent;
-
  if(!name||!plan||plan==="Your project plan will appear here."){
   alert("Please generate a project plan first.");return;
  }
-
  const saved={
   name,
   type:document.getElementById("plannerType").value,
@@ -313,7 +296,6 @@ function saveProjectPlan(){
   plan,
   savedAt:new Date().toLocaleString()
  };
-
  try{
   localStorage.setItem("NEXTGEN_PROJECT_PLAN",JSON.stringify(saved));
   document.getElementById("plannerStatus").textContent="✅ Project plan saved on this phone!";
@@ -325,7 +307,6 @@ function loadProjectPlan(){
   const saved=localStorage.getItem("NEXTGEN_PROJECT_PLAN");
   if(!saved){alert("No saved project plan found.");return;}
   const data=JSON.parse(saved);
-
   document.getElementById("plannerName").value=data.name||"";
   document.getElementById("plannerType").value=data.type||"Video Game";
   document.getElementById("plannerGoal").value=data.goal||"";
@@ -343,13 +324,10 @@ async function runSmartAnalysis(){
  const output=document.getElementById("smartResult");
  const status=document.getElementById("smartStatus");
  const button=document.getElementById("smartButton");
-
  if(!project_name||!description){output.textContent="Please enter project name and description.";return;}
-
  button.disabled=true;
  status.textContent="NEXTGEN AI is analyzing your project...";
  output.textContent="Please wait...";
-
  try{
   const response=await fetch(API+"/api/smart-analysis",{
    method:"POST",headers:{"Content-Type":"application/json"},
@@ -372,7 +350,6 @@ async function loadPlugins(){
   const response=await fetch(API+"/api/plugins");
   const data=await response.json();
   if(!response.ok)throw new Error("Could not load plugins.");
-
   const select=document.getElementById("plugin");
   select.innerHTML="";
   data.plugins.forEach(item=>{
@@ -390,11 +367,9 @@ async function runPlugin(){
  const input=document.getElementById("pluginInput").value;
  const output=document.getElementById("pluginResult");
  const button=document.getElementById("runPluginButton");
-
  if(!input.trim()){output.textContent="Please enter some input first.";return;}
  button.disabled=true;
  output.textContent="Running plugin...";
-
  try{
   const response=await fetch(API+"/api/plugins/run",{
    method:"POST",headers:{"Content-Type":"application/json"},
@@ -407,7 +382,7 @@ async function runPlugin(){
  finally{button.disabled=false;}
 }
 
-// BLOCK WORLD SURVIVAL GAME
+// GAME ENGINE
 const canvas=document.getElementById("gameCanvas");
 const ctx=canvas.getContext("2d");
 const TILE=32,COLS=20,ROWS=11;
@@ -416,6 +391,7 @@ let player={x:96,y:150,vx:0,vy:0,w:22,h:28,onGround:false,facing:1,walking:false
 let running=false,worldTheme="grass";
 let keys={left:false,right:false};
 let gameLoop=null,animationFrame=0;
+let lastJumpAt=0;
 
 function createWorld(){
  world=[];
@@ -472,19 +448,30 @@ function collides(x,y){
 
 function updateGame(){
  if(!running)return;
- const speed=3;
+
+ // Improved movement speed
+ const speed=5;
  player.vx=0;
- if(keys.left){player.vx=-speed;player.facing=-1;}
- if(keys.right){player.vx=speed;player.facing=1;}
+
+ if(keys.left){
+  player.vx=-speed;
+  player.facing=-1;
+ }
+ if(keys.right){
+  player.vx=speed;
+  player.facing=1;
+ }
+
  player.walking=player.vx!==0;
 
  let nextX=player.x+player.vx;
  if(!collides(nextX,player.y))player.x=nextX;
 
+ // Gravity and vertical collision
  player.vy+=0.5;
  if(player.vy>9)player.vy=9;
- let nextY=player.y+player.vy;
 
+ let nextY=player.y+player.vy;
  if(!collides(player.x,nextY)){
   player.y=nextY;
   player.onGround=false;
@@ -492,11 +479,19 @@ function updateGame(){
   if(player.vy>0){
    player.y=Math.floor((player.y+player.h)/TILE)*TILE-player.h;
    player.onGround=true;
+  }else{
+   player.y=Math.ceil(player.y/TILE)*TILE;
   }
   player.vy=0;
  }
 
- if(player.y>ROWS*TILE){player.x=96;player.y=150;player.vy=0;}
+ if(player.y>ROWS*TILE){
+  player.x=96;
+  player.y=150;
+  player.vy=0;
+  player.onGround=false;
+ }
+
  if(player.walking)animationFrame+=0.2;
  drawGame();
  gameLoop=requestAnimationFrame(updateGame);
@@ -559,12 +554,20 @@ function drawPlayer(){
  ctx.restore();
 }
 
+// Jump only once per button tap, with a short debounce
 function jump(){
- if(running&&player.onGround){
-  player.vy=-10;
-  player.onGround=false;
- }
+ const now=Date.now();
+ if(!running||!player.onGround||now-lastJumpAt<250)return;
+ lastJumpAt=now;
+ player.vy=-10;
+ player.onGround=false;
 }
+
+// Use click instead of pointerdown to avoid duplicate touch jump events
+document.getElementById("jumpBtn").addEventListener("click",function(e){
+ e.preventDefault();
+ jump();
+});
 
 function targetBlock(){
  const tx=Math.floor((player.x+(player.facing===1?player.w+8:-8))/TILE);
@@ -601,24 +604,31 @@ function placeBlock(){
  drawGame();
 }
 
+// Hold-to-move controls: keep moving until the finger is released
 function bindHold(id,key){
  const el=document.getElementById(id);
+
  el.addEventListener("pointerdown",e=>{
   e.preventDefault();
   keys[key]=true;
-  if(el.setPointerCapture)el.setPointerCapture(e.pointerId);
+  if(el.setPointerCapture){
+   try{el.setPointerCapture(e.pointerId);}catch(err){}
+  }
  });
- ["pointerup","pointerleave","pointercancel","lostpointercapture"].forEach(eventName=>{
-  el.addEventListener(eventName,()=>{keys[key]=false;});
+
+ ["pointerup","pointercancel","lostpointercapture"].forEach(eventName=>{
+  el.addEventListener(eventName,()=>{
+   keys[key]=false;
+  });
  });
 }
 
 bindHold("leftBtn","left");
 bindHold("rightBtn","right");
 
-document.getElementById("jumpBtn").addEventListener("pointerdown",e=>{
- e.preventDefault();
- jump();
+window.addEventListener("blur",()=>{
+ keys.left=false;
+ keys.right=false;
 });
 
 createWorld();
@@ -630,7 +640,9 @@ if("serviceWorker" in navigator){
   try{
    await navigator.serviceWorker.register("./service-worker.js");
    console.log("NEXTGEN service worker registered.");
-  }catch(error){console.error("Service worker registration failed:",error);}
+  }catch(error){
+   console.error("Service worker registration failed:",error);
+  }
  });
 }
 </script></body>

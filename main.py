@@ -1,11 +1,13 @@
 import os
 import base64
+import csv
 import httpx
 
-from io import BytesIO
+from io import BytesIO, StringIO
 from pypdf import PdfReader
 from docx import Document
 from openpyxl import load_workbook
+from pptx import Presentation
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -227,13 +229,15 @@ async def analyze_file(file: UploadFile = File(...)):
         ".txt",
         ".pdf",
         ".docx",
-        ".xlsx"
+        ".xlsx",
+        ".pptx",
+        ".csv"
     ]
 
     if extension not in allowed_extensions:
         raise HTTPException(
             400,
-            "Supported files: TXT, PDF, DOCX and XLSX."
+            "Supported files: TXT, PDF, DOCX, XLSX, PPTX and CSV."
         )
 
     data = await file.read()
@@ -290,6 +294,39 @@ async def analyze_file(file: UploadFile = File(...)):
 
             content = "\n".join(rows)
             workbook.close()
+
+        elif extension == ".pptx":
+            presentation = Presentation(BytesIO(data))
+
+            slides_text = []
+
+            for slide_number, slide in enumerate(
+                presentation.slides, start=1
+            ):
+                slides_text.append(f"Slide {slide_number}:")
+
+                for shape in slide.shapes:
+                    if shape.has_text_frame:
+                        slides_text.append(shape.text)
+
+                    if shape.has_table:
+                        for row in shape.table.rows:
+                            slides_text.append(
+                                " | ".join(
+                                    cell.text for cell in row.cells
+                                )
+                            )
+
+            content = "\n".join(slides_text)
+
+        elif extension == ".csv":
+            decoded = data.decode("utf-8-sig")
+            reader = csv.reader(StringIO(decoded))
+
+            content = "\n".join(
+                " | ".join(row)
+                for row in reader
+            )
 
     except Exception:
         raise HTTPException(

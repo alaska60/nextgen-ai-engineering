@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXTGEN AI CREATOR</title>
-
-<style>
+<title>NEXTGEN AI CREATOR</title><style>
 body {
   margin: 0;
   padding: 20px;
@@ -20,7 +17,7 @@ h1 { color: #38d9ff; }
   border-radius: 12px;
   margin-bottom: 15px;
 }
-textarea, input, button {
+textarea, input, select, button {
   width: 100%;
   box-sizing: border-box;
   padding: 12px;
@@ -28,50 +25,59 @@ textarea, input, button {
   border-radius: 8px;
   border: none;
 }
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 button {
   background: #08a6d9;
   color: white;
   font-weight: bold;
+  cursor: pointer;
 }
-#result {
+button:disabled {
+  opacity: 0.6;
+}
+#result, #pluginResult {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-</style>
-</head>
-
-<body>
-
-<h1>🚀 NEXTGEN AI CREATOR</h1>
-<p>Your AI Engineering Assistant</p>
-
-<div class="box">
+.status {
+  color: #38d9ff;
+  font-size: 14px;
+}
+</style></head><body><h1>🚀 NEXTGEN AI CREATOR</h1>
+<p>Your AI Engineering Assistant</p><div class="box">
 <h2>🤖 AI Chat</h2>
 <textarea id="message" placeholder="Ask NEXTGEN AI..."></textarea>
 <button onclick="sendChat()">Send Message</button>
-</div>
-
-<div class="box">
+</div><div class="box">
 <h2>🖼️ AI Image Analysis</h2>
 <input type="file" id="image" accept="image/*">
 <textarea id="prompt">Describe and analyze this image.</textarea>
 <button onclick="analyzeImage()">Analyze Image</button>
-</div>
-
-<div class="box">
+</div><div class="box">
 <h2>📁 AI File Analysis</h2>
 <p>Upload PDF, DOCX, XLSX, TXT, PPTX or CSV files.</p>
 <input type="file" id="document"
 accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
-</div>
+</div><div class="box">
+<h2>🧩 NEXTGEN Plugins</h2>
+<p>Choose a plugin and enter your input.</p><label for="plugin">Select Plugin:</label>
+<select id="plugin">
 
-<div class="box">
+  <option value="calculator">Calculator</option>
+  <option value="text_analyzer">Text Analyzer</option>
+  <option value="json_formatter">JSON Formatter</option>
+</select><textarea id="pluginInput" placeholder="Enter your input..."></textarea><button id="runPluginButton" onclick="runPlugin()">Run Plugin</button>
+
+<p class="status" id="pluginStatus">Loading plugins...</p><h3>Plugin Result</h3>
+<div id="pluginResult">Your plugin result will appear here.</div>
+</div><div class="box">
 <h2>📄 AI Response</h2>
 <div id="result">Welcome to NEXTGEN AI CREATOR!</div>
-</div>
-
-<script>
+</div><script>
 const API = "https://nextgen-ai-engineering.onrender.com";
 
 async function sendChat() {
@@ -165,7 +171,74 @@ async function analyzeFile() {
     result.textContent = "File analysis error: " + error.message;
   }
 }
-</script>
 
-</body>
+// Load available plugins
+async function loadPlugins() {
+  const status = document.getElementById("pluginStatus");
+
+  try {
+    const response = await fetch(API + "/api/plugins");
+    const data = await response.json();
+
+    if (!response.ok) throw new Error("Could not load plugins.");
+
+    const select = document.getElementById("plugin");
+    select.innerHTML = "";
+
+    data.plugins.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.name;
+      select.appendChild(option);
+    });
+
+    status.textContent = data.plugins.length + " plugins available.";
+  } catch (error) {
+    status.textContent = "Plugin loading error: " + error.message;
+  }
+}
+
+// Run selected plugin
+async function runPlugin() {
+  const plugin = document.getElementById("plugin").value;
+  const input = document.getElementById("pluginInput").value;
+  const output = document.getElementById("pluginResult");
+  const button = document.getElementById("runPluginButton");
+
+  if (!input.trim()) {
+    output.textContent = "Please enter some input first.";
+    return;
+  }
+
+  button.disabled = true;
+  output.textContent = "Running plugin... Please wait.";
+
+  try {
+    const response = await fetch(API + "/api/plugins/run", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        plugin: plugin,
+        input: input
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch (error) {
+    output.textContent = "Plugin error: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// Load plugins when the page opens
+loadPlugins();
+</script></body>
 </html>

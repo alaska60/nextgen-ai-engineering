@@ -1,0 +1,11 @@
+{
+  "name": "NEXTGEN AI CREATOR",
+  "short_name": "NEXTGEN AI",
+  "description": "Your AI Engineering Assistant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101827",
+  "theme_color": "#101827"
+}

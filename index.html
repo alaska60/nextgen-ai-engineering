@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXTGEN AI CREATOR</title>
+
 <style>
 body {
   margin: 0;
@@ -38,6 +39,7 @@ button {
 }
 </style>
 </head>
+
 <body>
 
 <h1>🚀 NEXTGEN AI CREATOR</h1>
@@ -57,7 +59,15 @@ button {
 </div>
 
 <div class="box">
-<h2>📁 AI Response</h2>
+<h2>📁 AI File Analysis</h2>
+<p>Upload PDF, DOCX, XLSX or TXT files.</p>
+<input type="file" id="document"
+accept=".pdf,.docx,.xlsx,.txt">
+<button onclick="analyzeFile()">Analyze File</button>
+</div>
+
+<div class="box">
+<h2>📄 AI Response</h2>
 <div id="result">Welcome to NEXTGEN AI CREATOR!</div>
 </div>
 
@@ -83,7 +93,6 @@ async function sendChat() {
     });
 
     const data = await response.json();
-
     if (!response.ok) throw new Error(JSON.stringify(data));
 
     result.textContent = data.reply || JSON.stringify(data);
@@ -115,12 +124,45 @@ async function analyzeImage() {
     });
 
     const data = await response.json();
-
     if (!response.ok) throw new Error(JSON.stringify(data));
 
     result.textContent = data.reply || JSON.stringify(data);
   } catch (error) {
     result.textContent = "Error: " + error.message;
+  }
+}
+
+async function analyzeFile() {
+  const file = document.getElementById("document").files[0];
+  const result = document.getElementById("result");
+
+  if (!file) {
+    result.textContent = "Please choose a file first.";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    result.textContent = "File is too large. Maximum size is 10 MB.";
+    return;
+  }
+
+  result.textContent = "Analyzing file... Please wait.";
+
+  const form = new FormData();
+  form.append("file", file);
+
+  try {
+    const response = await fetch(API + "/api/analyze-file", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(JSON.stringify(data));
+
+    result.textContent = data.reply || JSON.stringify(data);
+  } catch (error) {
+    result.textContent = "File analysis error: " + error.message;
   }
 }
 </script>

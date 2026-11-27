@@ -188,6 +188,7 @@ hr{border:1px solid #334155;margin:18px 0}
     <button onclick="selectItem(3)">⚔ Sword<br>1</button>
     <button onclick="selectItem(4)">🍎 Apple<br>10</button>
   </div>
+
   <p id="selectedItem">Selected: Grass Block</p>
   <button onclick="toggleInventory()">🎒 Open / Close Inventory</button>
 
@@ -198,6 +199,7 @@ hr{border:1px solid #334155;margin:18px 0}
 
   <button onclick="resetWorld()">🔄 Reset World</button>
   <button onclick="showSection('mainMenu')">🏠 Main Menu</button>
+
   <p class="small">This is a basic 2D prototype, not the complete 3D game yet.</p>
 </section>
 
@@ -222,8 +224,7 @@ hr{border:1px solid #334155;margin:18px 0}
 <section id="fileSection">
   <h2>📁 FILE ANALYSIS</h2>
   <p class="small">Supported: PDF, DOCX, XLSX, TXT, PPTX, CSV. Maximum 10 MB.</p>
-  <input type="file" id="documentFile"
-    accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
+  <input type="file" id="documentFile" accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
   <button onclick="analyzeFile()">📄 Analyze File</button>
   <div id="fileOutput" class="output">Choose a file to begin.</div>
 </section>
@@ -231,6 +232,7 @@ hr{border:1px solid #334155;margin:18px 0}
 <!-- PROJECT PLANNER -->
 <section id="plannerSection">
   <h2>📝 NEXTGEN PROJECT PLANNER</h2>
+
   <label>Project Name</label>
   <input id="projectName" placeholder="Example: BLOCK WORLD SURVIVAL">
 
@@ -250,8 +252,10 @@ hr{border:1px solid #334155;margin:18px 0}
   <textarea id="projectFeatures" placeholder="List your important features..."></textarea>
 
   <button onclick="generatePlan()">🧠 Generate AI Project Plan</button>
+
   <h3>📝 Your Project Plan</h3>
   <div id="planOutput" class="output">Your project plan will appear here.</div>
+
   <button onclick="savePlan()">💾 Save Project Plan on This Phone</button>
   <button onclick="loadPlan()">📂 Load Saved Project Plan</button>
   <p class="small">Saved in this browser on this phone, not cloud storage.</p>
@@ -286,35 +290,49 @@ hr{border:1px solid #334155;margin:18px 0}
   <div id="pluginOutput" class="output">Plugin result will appear here.</div>
 </section>
 
-<!-- AI GAME DEVELOPMENT WORKER -->
+<!-- UPGRADED AI GAME DEVELOPER -->
 <section id="gameWorker">
-  <h2>🧠 AI GAME DEVELOPMENT WORKER</h2>
-  <p>Let AI help develop BLOCK WORLD SURVIVAL!</p>
+  <h2>🤖 BLOCK WORLD SURVIVAL GAME DEVELOPER</h2>
+  <p>AI-powered development assistant for our Godot game project.</p>
 
-  <label>Choose Development Task</label>
+  <label>Game Engine</label>
+  <select id="workerEngine">
+    <option value="Godot 4">Godot 4</option>
+  </select>
+
+  <label>Development Task</label>
   <select id="workerTask">
-    <option value="generate">Generate Game Code</option>
-    <option value="review">Review Game Code</option>
-    <option value="fix">Find Bugs and Suggest Fixes</option>
-    <option value="design">Design a Game Feature</option>
-    <option value="optimize">Optimize for Android</option>
+    <option value="create_project">🏗️ Create Complete Game Project</option>
+    <option value="generate">🧱 Generate Godot Game Files</option>
+    <option value="player">🧍 Create Player System</option>
+    <option value="animal">🐾 Create Animal AI</option>
+    <option value="monster">👹 Create Monster AI</option>
+    <option value="world">🌍 Create World Generation</option>
+    <option value="npc">🏰 Create NPC and Villager AI</option>
+    <option value="combat">⚔️ Create Weapons and Combat</option>
+    <option value="inventory">🎒 Create Inventory and Crafting</option>
+    <option value="review">🔍 Review Game Code</option>
+    <option value="fix">🛠️ Find and Fix Bugs</option>
+    <option value="optimize">📱 Optimize for Android</option>
   </select>
 
   <label>Game Feature or Request</label>
-  <textarea id="gameFeature"
-    placeholder="Example: Create 100 land animals with movement, eating, babies and breeding."></textarea>
+  <textarea id="gameFeature" placeholder="Example: Create intelligent sheep that find grass and water, sleep, reproduce and care for babies."></textarea>
 
   <label>Existing Code (Optional)</label>
-  <textarea id="existingGameCode"
-    placeholder="Paste the code you want AI to review or improve."></textarea>
+  <textarea id="existingGameCode" placeholder="Paste existing GDScript code here if you want AI to review it."></textarea>
 
-  <button onclick="runGameWorker()">⚙️ Start AI Game Developer</button>
+  <button onclick="runGameWorker()">🚀 START GAME DEVELOPMENT</button>
 
-  <h3>📄 AI Game Developer Output</h3>
-  <div id="gameWorkerOutput" class="output">Ready to develop your game!</div>
+  <h3>📂 AI Developer Output</h3>
+  <div id="gameWorkerOutput" class="output">Ready to develop BLOCK WORLD SURVIVAL!</div>
 
   <button onclick="copyGameCode()">📋 Copy Output</button>
-  <p class="small">AI generates and reviews code. Generated code is not automatically installed into the game or tested by the game engine.</p>
+
+  <p class="small">
+    AI generates project instructions and code. Actual project-file creation,
+    engine testing and APK building are separate steps.
+  </p>
 </section>
 
 <footer class="panel">
@@ -329,20 +347,25 @@ const API = "https://nextgen-ai-engineering.onrender.com";
 async function apiRequest(path, options={}) {
   const response = await fetch(API + path, options);
   const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
     throw new Error(data.detail || data.error || "Request failed: " + response.status);
   }
+
   return data;
 }
 
+/* NAVIGATION */
 function showSection(id) {
   const sections = [
     "mainMenu","createWorld","serversSection",
     "friendsSection","settingsSection","gameSection"
   ];
+
   sections.forEach(section => {
     document.getElementById(section).classList.add("hidden");
   });
+
   document.getElementById(id).classList.remove("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -351,15 +374,17 @@ function showSection(id) {
 function createWorldFromMenu() {
   const name = document.getElementById("worldName").value.trim();
   const type = document.getElementById("worldType").value;
+
   document.getElementById("gameName").value = name || "BLOCK WORLD SURVIVAL";
   document.getElementById("gameWorldType").value =
     ["grass","desert","snow"].includes(type) ? type : "grass";
+
   showSection("gameSection");
   createWorld();
   startGame();
 }
 
-/* GAME ENGINE: BASIC 2D PROTOTYPE */
+/* BASIC 2D GAME PROTOTYPE */
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const TILE = 32;
@@ -372,33 +397,38 @@ let keys = {left:false,right:false};
 let gameRunning = false;
 let selectedBlock = 0;
 let inventoryCounts = [64,32,1,1,10];
+
 const itemNames = ["Grass Block","Wood","Pickaxe","Sword","Apple"];
 
 function createWorld() {
   world = [];
+
   for (let y=0;y<ROWS;y++) {
     world[y] = [];
     for (let x=0;x<COLS;x++) {
       world[y][x] = y >= 9 ? 1 : 0;
     }
   }
+
   player = {x:90,y:180,w:23,h:29,vx:0,vy:0,onGround:false,jumps:0};
   drawGame();
 }
 
 function drawGame() {
   const type = document.getElementById("gameWorldType").value;
+
   let sky = "#7dd3fc";
   let ground = "#22c55e";
+
   if(type==="desert"){sky="#fbbf24";ground="#d6a84b";}
   if(type==="snow"){sky="#bae6fd";ground="#e2e8f0";}
 
   ctx.fillStyle=sky;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  for(let y=0;y<ROWS;y++){
-    for(let x=0;x<COLS;x++){
-      if(world[y] && world[y][x]){
+  for(let y=0;y<ROWS;y++) {
+    for(let x=0;x<COLS;x++) {
+      if(world[y] && world[y][x]) {
         ctx.fillStyle = world[y][x]===2 ? "#a16207" : ground;
         ctx.fillRect(x*TILE,y*TILE,TILE,TILE);
         ctx.strokeStyle="rgba(0,0,0,.12)";
@@ -407,11 +437,12 @@ function drawGame() {
     }
   }
 
-  // Simple block-style player
   ctx.fillStyle="#2563eb";
   ctx.fillRect(player.x,player.y,player.w,player.h);
+
   ctx.fillStyle="#facc15";
   ctx.fillRect(player.x+4,player.y+3,15,10);
+
   ctx.fillStyle="#111827";
   ctx.fillRect(player.x+7,player.y+7,3,3);
   ctx.fillRect(player.x+15,player.y+7,3,3);
@@ -419,8 +450,10 @@ function drawGame() {
 
 function startGame() {
   if(gameRunning) return;
+
   createWorld();
   gameRunning=true;
+
   document.getElementById("gameStatus").textContent="🎮 Game started!";
   requestAnimationFrame(gameLoop);
 }
@@ -430,22 +463,22 @@ function gameLoop() {
 
   const speed=3.5;
   player.vx=0;
+
   if(keys.left)player.vx=-speed;
   if(keys.right)player.vx=speed;
 
-  // Horizontal collision
   let nextX=player.x+player.vx;
   if(!collides(nextX,player.y))player.x=nextX;
 
-  // Gravity and vertical movement
   player.vy+=0.55;
   if(player.vy>10)player.vy=10;
 
   let nextY=player.y+player.vy;
-  if(!collides(player.x,nextY)){
+
+  if(!collides(player.x,nextY)) {
     player.y=nextY;
     player.onGround=false;
-  }else{
+  } else {
     if(player.vy>0)player.onGround=true;
     player.vy=0;
     if(player.onGround)player.jumps=0;
@@ -453,8 +486,11 @@ function gameLoop() {
 
   if(player.x<0)player.x=0;
   if(player.x+player.w>canvas.width)player.x=canvas.width-player.w;
-  if(player.y>canvas.height){
-    player.x=90;player.y=100;player.vy=0;
+
+  if(player.y>canvas.height) {
+    player.x=90;
+    player.y=100;
+    player.vy=0;
   }
 
   drawGame();
@@ -468,16 +504,18 @@ function collides(px,py) {
     [px+2,py+player.h-2],
     [px+player.w-2,py+player.h-2]
   ];
+
   return points.some(([x,y])=>{
     const tx=Math.floor(x/TILE);
     const ty=Math.floor(y/TILE);
+
     return ty>=0 && ty<ROWS && tx>=0 && tx<COLS &&
       world[ty] && world[ty][tx]!==0;
   });
 }
 
 function jump() {
-  if(player.jumps<2){
+  if(player.jumps<2) {
     player.vy=-10;
     player.onGround=false;
     player.jumps++;
@@ -486,29 +524,37 @@ function jump() {
 
 function bindHold(id,key) {
   const btn=document.getElementById(id);
+
   btn.addEventListener("pointerdown",e=>{
-    e.preventDefault();keys[key]=true;
+    e.preventDefault();
+    keys[key]=true;
     btn.setPointerCapture(e.pointerId);
   });
+
   ["pointerup","pointercancel","lostpointercapture"].forEach(event=>{
     btn.addEventListener(event,()=>keys[key]=false);
   });
 }
+
 bindHold("leftBtn","left");
 bindHold("rightBtn","right");
+
 document.getElementById("jumpBtn").addEventListener("click",jump);
 
 function targetBlock() {
   const tx=Math.floor((player.x+player.w+3)/TILE);
   const ty=Math.floor((player.y+player.h/2)/TILE);
+
   if(tx<0||tx>=COLS||ty<0||ty>=ROWS)return null;
+
   return {tx,ty};
 }
 
 function breakBlock() {
   const t=targetBlock();
   if(!t)return;
-  if(world[t.ty][t.tx]!==0){
+
+  if(world[t.ty][t.tx]!==0) {
     world[t.ty][t.tx]=0;
     inventoryCounts[0]++;
     updateInventory();
@@ -517,15 +563,18 @@ function breakBlock() {
 }
 
 function placeBlock() {
-  if(selectedBlock!==0){
+  if(selectedBlock!==0) {
     document.getElementById("gameStatus").textContent=
       "Grass Block is the only placeable block in this prototype.";
     return;
   }
+
   if(inventoryCounts[0]<=0)return;
+
   const t=targetBlock();
   if(!t)return;
-  if(world[t.ty][t.tx]===0){
+
+  if(world[t.ty][t.tx]===0) {
     world[t.ty][t.tx]=1;
     inventoryCounts[0]--;
     updateInventory();
@@ -545,6 +594,7 @@ function resetWorld() {
 
 function selectItem(index) {
   selectedBlock=index;
+
   document.getElementById("selectedItem").textContent=
     "Selected: "+itemNames[index];
 }
@@ -566,16 +616,25 @@ createWorld();
 async function sendChat() {
   const message=document.getElementById("chatMessage").value.trim();
   const out=document.getElementById("chatOutput");
-  if(!message){out.textContent="Please enter a message.";return;}
+
+  if(!message) {
+    out.textContent="Please enter a message.";
+    return;
+  }
+
   out.textContent="AI is thinking...";
-  try{
+
+  try {
     const data=await apiRequest("/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message})
     });
+
     out.textContent=data.response||data.reply||JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error: "+e.message;}
+  } catch(e) {
+    out.textContent="Error: "+e.message;
+  }
 }
 
 /* IMAGE ANALYSIS */
@@ -583,30 +642,60 @@ async function analyzeImage() {
   const file=document.getElementById("imageFile").files[0];
   const prompt=document.getElementById("imagePrompt").value.trim();
   const out=document.getElementById("imageOutput");
-  if(!file){out.textContent="Please choose an image.";return;}
+
+  if(!file) {
+    out.textContent="Please choose an image.";
+    return;
+  }
+
   const form=new FormData();
   form.append("file",file);
   form.append("prompt",prompt||"Analyze this image.");
+
   out.textContent="Analyzing image...";
-  try{
-    const data=await apiRequest("/api/analyze-image",{method:"POST",body:form});
+
+  try {
+    const data=await apiRequest("/api/analyze-image",{
+      method:"POST",
+      body:form
+    });
+
     out.textContent=data.analysis||data.response||JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error: "+e.message;}
+  } catch(e) {
+    out.textContent="Error: "+e.message;
+  }
 }
 
 /* FILE ANALYSIS */
 async function analyzeFile() {
   const file=document.getElementById("documentFile").files[0];
   const out=document.getElementById("fileOutput");
-  if(!file){out.textContent="Please choose a file.";return;}
-  if(file.size>10*1024*1024){out.textContent="File exceeds 10 MB.";return;}
+
+  if(!file) {
+    out.textContent="Please choose a file.";
+    return;
+  }
+
+  if(file.size>10*1024*1024) {
+    out.textContent="File exceeds 10 MB.";
+    return;
+  }
+
   const form=new FormData();
   form.append("file",file);
+
   out.textContent="Analyzing file...";
-  try{
-    const data=await apiRequest("/api/analyze-file",{method:"POST",body:form});
+
+  try {
+    const data=await apiRequest("/api/analyze-file",{
+      method:"POST",
+      body:form
+    });
+
     out.textContent=data.analysis||data.response||JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error: "+e.message;}
+  } catch(e) {
+    out.textContent="Error: "+e.message;
+  }
 }
 
 /* PROJECT PLANNER */
@@ -616,21 +705,31 @@ async function generatePlan() {
   const goal=document.getElementById("projectGoal").value.trim();
   const features=document.getElementById("projectFeatures").value.trim();
   const out=document.getElementById("planOutput");
-  if(!name||!goal){out.textContent="Enter a project name and goal.";return;}
+
+  if(!name||!goal) {
+    out.textContent="Enter a project name and goal.";
+    return;
+  }
+
   out.textContent="Generating project plan...";
+
   const message=
     "Create a practical step-by-step project plan. "+
     "Project name: "+name+". Type: "+type+
     ". Goal: "+goal+". Features: "+features+
     ". Include phases, tools, risks and testing.";
-  try{
+
+  try {
     const data=await apiRequest("/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message})
     });
+
     out.textContent=data.response||data.reply||JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error: "+e.message;}
+  } catch(e) {
+    out.textContent="Error: "+e.message;
+  }
 }
 
 function savePlan() {
@@ -641,14 +740,21 @@ function savePlan() {
     features:document.getElementById("projectFeatures").value,
     output:document.getElementById("planOutput").textContent
   };
+
   localStorage.setItem("NEXTGEN_PROJECT_PLAN",JSON.stringify(plan));
   alert("Project plan saved on this phone!");
 }
 
 function loadPlan() {
   const saved=localStorage.getItem("NEXTGEN_PROJECT_PLAN");
-  if(!saved){alert("No saved project plan found.");return;}
+
+  if(!saved) {
+    alert("No saved project plan found.");
+    return;
+  }
+
   const p=JSON.parse(saved);
+
   document.getElementById("projectName").value=p.name||"";
   document.getElementById("projectType").value=p.type||"Video Game";
   document.getElementById("projectGoal").value=p.goal||"";
@@ -660,94 +766,187 @@ function loadPlan() {
 async function runSmartAnalysis() {
   const input=document.getElementById("smartInput").value.trim();
   const out=document.getElementById("smartOutput");
-  if(!input){out.textContent="Describe what you want analyzed.";return;}
+
+  if(!input) {
+    out.textContent="Describe what you want analyzed.";
+    return;
+  }
+
   out.textContent="Smart Analysis is working...";
-  try{
+
+  try {
     const data=await apiRequest("/api/smart-analysis",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({content:input})
     });
+
     out.textContent=data.analysis||data.result||JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error: "+e.message;}
+  } catch(e) {
+    out.textContent="Error: "+e.message;
+  }
 }
 
 /* PLUGINS */
 async function loadPlugins() {
   const out=document.getElementById("pluginList");
   out.textContent="Loading plugins...";
-  try{
+
+  try {
     const data=await apiRequest("/api/plugins");
     out.textContent=JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Error loading plugins: "+e.message;}
+  } catch(e) {
+    out.textContent="Error loading plugins: "+e.message;
+  }
 }
 
 async function runPlugin() {
   const plugin=document.getElementById("pluginChoice").value;
   const input=document.getElementById("pluginInput").value;
   const out=document.getElementById("pluginOutput");
+
   out.textContent="Running plugin...";
-  try{
+
+  try {
     const data=await apiRequest("/api/plugins/run",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({plugin,input})
     });
+
     out.textContent=JSON.stringify(data,null,2);
-  }catch(e){out.textContent="Plugin error: "+e.message;}
+  } catch(e) {
+    out.textContent="Plugin error: "+e.message;
+  }
 }
 
-/* AI GAME DEVELOPMENT WORKER */
+/* BLOCK WORLD SURVIVAL GAME DEVELOPER */
 async function runGameWorker() {
   const task=document.getElementById("workerTask").value;
+  const engine=document.getElementById("workerEngine").value;
   const feature=document.getElementById("gameFeature").value.trim();
   const code=document.getElementById("existingGameCode").value.trim();
   const out=document.getElementById("gameWorkerOutput");
 
-  if(!feature){
-    out.textContent="Please describe the game feature or development task.";
+  if(!feature) {
+    out.textContent="Please describe what you want to develop.";
     return;
   }
 
-  const taskNames={
-    generate:"Generate practical game code",
-    review:"Review the supplied game code and identify problems",
-    fix:"Find possible bugs and suggest corrected code",
-    design:"Design a detailed game feature and its implementation",
-    optimize:"Suggest optimization for Android devices"
+  const tasks={
+    create_project:
+      "Create a complete Godot project structure with folders, scenes, scripts and project configuration.",
+
+    generate:
+      "Generate complete Godot 4 GDScript files.",
+
+    player:
+      "Develop a complete player controller and character system.",
+
+    animal:
+      "Develop intelligent animal AI including finding food and water, eating, drinking, sleeping, resting, fleeing predators, reproducing and caring for babies.",
+
+    monster:
+      "Develop monster AI including player detection, chasing, attacking, hunting and special abilities.",
+
+    world:
+      "Develop voxel world generation, terrain, chunk loading and biome systems.",
+
+    npc:
+      "Develop NPC and villager AI including jobs, homes, conversations, families, trading and kingdoms.",
+
+    combat:
+      "Develop weapons, armor, combat mechanics, damage, defense and boss battle systems.",
+
+    inventory:
+      "Develop inventory, hotbar, item stacking, crafting, storage and equipment systems.",
+
+    review:
+      "Review supplied code and identify errors, missing dependencies and improvements.",
+
+    fix:
+      "Find bugs and provide corrected complete code with explanations.",
+
+    optimize:
+      "Optimize the game for Android devices with limited RAM and processing power."
   };
 
-  const message=
-    "You are NEXTGEN AI GAME DEVELOPMENT WORKER. "+
-    "We are developing BLOCK WORLD SURVIVAL, a Minecraft-style voxel game "+
-    "for Android. Graphics should remain block-style, with realistic-feeling "+
-    "environment behavior. Task: "+taskNames[task]+". "+
-    "Requested feature: "+feature+". "+
-    "Existing code, if supplied: "+(code||"No existing code supplied.")+
-    ". Provide practical code, explain which file or location it belongs in, "+
-    "identify dependencies and limitations, and include testing steps. "+
-    "Do not claim code has been tested unless it actually has. "+
-    "Prefer free tools and avoid paid services.";
+  const message=`
+You are the professional AI GAME DEVELOPER
+for BLOCK WORLD SURVIVAL.
 
-  out.textContent="🧠 AI Game Developer is working. Please wait...";
-  try{
+GAME ENGINE: ${engine}
+TASK: ${tasks[task]}
+
+GAME REQUIREMENTS:
+- Minecraft-style voxel/block graphics.
+- Godot 4 and GDScript.
+- Android compatibility.
+- Offline gameplay as a priority.
+- Modular and organized project structure.
+- Support future expansion into a large survival game.
+- Free-first development.
+- Do not require paid tools or services.
+
+REQUEST:
+${feature}
+
+EXISTING CODE:
+${code || "No existing code supplied."}
+
+IMPORTANT INSTRUCTIONS:
+
+1. Give the exact project folder structure.
+2. Give the exact filename for every file.
+3. Provide complete code, not incomplete snippets.
+4. Explain where every file belongs.
+5. Include necessary scene and node setup.
+6. Identify dependencies and Godot version requirements.
+7. Explain how to run and test the project.
+8. Review possible errors before presenting code.
+9. Never claim code was executed or tested if it was not.
+10. Do not invent completed features.
+11. Keep the code organized and suitable for future expansion.
+12. Use GDScript compatible with Godot 4.
+13. Separate different scripts into their own files.
+14. Mention any features that still need implementation.
+
+Organize the answer into:
+
+A. Project Structure
+B. Files and Complete Code
+C. Installation Instructions
+D. Testing Instructions
+E. Known Limitations
+`;
+
+  out.textContent="🤖 AI Game Developer is creating your project. Please wait...";
+
+  try {
     const data=await apiRequest("/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({message})
     });
-    out.textContent=data.response||data.reply||JSON.stringify(data,null,2);
-  }catch(e){
-    out.textContent="Game Developer Error: "+e.message;
+
+    out.textContent=
+      data.response||
+      data.reply||
+      JSON.stringify(data,null,2);
+
+  } catch(error) {
+    out.textContent="Development Error: "+error.message;
   }
 }
 
+/* COPY GAME DEVELOPER OUTPUT */
 async function copyGameCode() {
   const text=document.getElementById("gameWorkerOutput").textContent;
-  try{
+
+  try {
     await navigator.clipboard.writeText(text);
     alert("AI output copied!");
-  }catch(e){
+  } catch(e) {
     alert("Copy not available in this browser. Please select and copy the text manually.");
   }
 }
@@ -756,7 +955,7 @@ async function copyGameCode() {
 loadPlugins();
 
 /* SERVICE WORKER */
-if("serviceWorker" in navigator){
+if("serviceWorker" in navigator) {
   window.addEventListener("load",()=>{
     navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
   });

@@ -39,13 +39,16 @@ button {
   cursor: pointer;
 }
 button:disabled { opacity: 0.6; }
-#result, #pluginResult, #smartResult {
+#result, #pluginResult, #smartResult, #plannerResult {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .status {
   color: #38d9ff;
   font-size: 14px;
+}
+.secondary {
+  background: #475569;
 }
 </style></head><body><h1>🚀 NEXTGEN AI CREATOR</h1>
 <p>Your AI Engineering Assistant</p><div class="box">
@@ -63,6 +66,32 @@ button:disabled { opacity: 0.6; }
 <input type="file" id="document"
 accept=".pdf,.docx,.xlsx,.txt,.pptx,.csv">
 <button onclick="analyzeFile()">Analyze File</button>
+</div><!-- PROJECT PLANNER --><div class="box">
+<h2>📋 NEXTGEN PROJECT PLANNER</h2>
+<p>Plan your game, app, website or creative project with AI.</p><label>Project Name:</label>
+<input id="plannerName" placeholder="Example: BLOCK WORLD SURVIVAL">
+
+<label>Project Type:</label>
+<select id="plannerType">
+
+<option>Video Game</option>
+<option>Mobile App</option>
+<option>Website</option>
+<option>Software</option>
+<option>Creative Project</option>
+<option>Other</option>
+</select><label>Project Goal:</label>
+
+<textarea id="plannerGoal"
+placeholder="What do you want to create?"></textarea><label>Important Features:</label>
+
+<textarea id="plannerFeatures"
+placeholder="List the features you want..."></textarea><button id="plannerButton" onclick="generateProjectPlan()">
+🧠 Generate AI Project Plan
+</button><p class="status" id="plannerStatus">Ready to plan your project.</p><h3>📝 Your Project Plan</h3>
+<div id="plannerResult">Your project plan will appear here.</div><button onclick="saveProjectPlan()">💾 Save Project Plan on This Phone</button>
+<button class="secondary" onclick="loadProjectPlan()">📂 Load Saved Project Plan</button>
+
 </div><!-- SMART ANALYSIS --><div class="box">
 <h2>🧠 NEXTGEN SMART ANALYSIS</h2>
 <p>Test your project concept, identify problems and discover improvements.</p><label>Project Name:</label>
@@ -84,7 +113,7 @@ placeholder="Describe your project and its features..."></textarea><button id="s
 🚀 Analyze Project
 </button><p class="status" id="smartStatus">Ready for project analysis.</p><h3>📊 Smart Analysis Results</h3>
 <div id="smartResult">Your project analysis will appear here.</div>
-</div><div class="box">
+</div><!-- PLUGINS --><div class="box">
 <h2>🧩 NEXTGEN Plugins</h2>
 <p>Choose a plugin and enter your input.</p><label for="plugin">Select Plugin:</label>
 <select id="plugin">
@@ -195,6 +224,125 @@ async function analyzeFile() {
   }
 }
 
+// PROJECT PLANNER
+async function generateProjectPlan() {
+  const name = document.getElementById("plannerName").value.trim();
+  const type = document.getElementById("plannerType").value;
+  const goal = document.getElementById("plannerGoal").value.trim();
+  const features = document.getElementById("plannerFeatures").value.trim();
+
+  const output = document.getElementById("plannerResult");
+  const status = document.getElementById("plannerStatus");
+  const button = document.getElementById("plannerButton");
+
+  if (!name || !goal || !features) {
+    output.textContent = "Please complete the project name, goal and features.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "AI is creating your project plan...";
+  output.textContent = "Please wait...";
+
+  const message = `
+Create a practical development plan for this project.
+
+Project name: ${name}
+Project type: ${type}
+Project goal: ${goal}
+Important features: ${features}
+
+Include:
+1. Project overview
+2. Main features
+3. Development phases in order
+4. Tools and technology suggestions, prioritizing free tools
+5. Testing plan
+6. Important risks and solutions
+7. First tasks to start with
+
+Be realistic. Separate features that can be built now from future features.
+`;
+
+  try {
+    const response = await fetch(API + "/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message})
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(JSON.stringify(data));
+
+    output.textContent = data.reply || JSON.stringify(data);
+    status.textContent = "✅ Project plan generated!";
+
+  } catch (error) {
+    output.textContent = "Planner error: " + error.message;
+    status.textContent = "Could not generate the plan.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+// SAVE PROJECT PLAN ON PHONE
+function saveProjectPlan() {
+  const name = document.getElementById("plannerName").value.trim();
+  const type = document.getElementById("plannerType").value;
+  const goal = document.getElementById("plannerGoal").value;
+  const features = document.getElementById("plannerFeatures").value;
+  const plan = document.getElementById("plannerResult").textContent;
+
+  if (!name || !plan || plan === "Your project plan will appear here.") {
+    alert("Please generate a project plan first.");
+    return;
+  }
+
+  const saved = {
+    name,
+    type,
+    goal,
+    features,
+    plan,
+    savedAt: new Date().toLocaleString()
+  };
+
+  try {
+    localStorage.setItem("NEXTGEN_PROJECT_PLAN", JSON.stringify(saved));
+    document.getElementById("plannerStatus").textContent =
+      "✅ Project plan saved on this phone!";
+  } catch (error) {
+    alert("Could not save the project plan: " + error.message);
+  }
+}
+
+// LOAD SAVED PROJECT PLAN
+function loadProjectPlan() {
+  const output = document.getElementById("plannerResult");
+
+  try {
+    const saved = localStorage.getItem("NEXTGEN_PROJECT_PLAN");
+
+    if (!saved) {
+      alert("No saved project plan found on this phone.");
+      return;
+    }
+
+    const data = JSON.parse(saved);
+
+    document.getElementById("plannerName").value = data.name || "";
+    document.getElementById("plannerType").value = data.type || "Video Game";
+    document.getElementById("plannerGoal").value = data.goal || "";
+    document.getElementById("plannerFeatures").value = data.features || "";
+    output.textContent = data.plan || "";
+
+    document.getElementById("plannerStatus").textContent =
+      "Loaded saved project plan. Saved: " + (data.savedAt || "Unknown");
+  } catch (error) {
+    alert("Could not load the saved plan: " + error.message);
+  }
+}
+
 // SMART ANALYSIS
 async function runSmartAnalysis() {
   const project_name = document.getElementById("projectName").value.trim();
@@ -226,10 +374,7 @@ async function runSmartAnalysis() {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(JSON.stringify(data));
-    }
+    if (!response.ok) throw new Error(JSON.stringify(data));
 
     output.textContent = data.analysis || "No analysis received.";
     status.textContent = "✅ Analysis completed successfully!";

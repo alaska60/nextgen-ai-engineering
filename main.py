@@ -40,6 +40,12 @@ class PluginRequest(BaseModel):
     input: str
 
 
+class SmartAnalysisRequest(BaseModel):
+    project_name: str
+    project_type: str
+    description: str
+
+
 # =====================================
 # HOME AND HEALTH
 # =====================================
@@ -49,7 +55,8 @@ def home():
     return {
         "name": "NEXTGEN AI BRAIN",
         "status": "online",
-        "plugins": True
+        "plugins": True,
+        "smart_analysis": True
     }
 
 
@@ -414,6 +421,109 @@ async def analyze_file(file: UploadFile = File(...)):
         return {
             "reply": result["choices"][0]["message"]["content"],
             "filename": filename,
+            "model": MODEL
+        }
+
+    except httpx.RequestError:
+        raise HTTPException(
+            503,
+            "Could not connect to AI provider"
+        )
+
+
+# =====================================
+# NEXTGEN SMART ANALYSIS
+# =====================================
+
+@app.post("/api/smart-analysis")
+async def smart_analysis(data: SmartAnalysisRequest):
+
+    api_key = os.getenv("GROQ_API_KEY")
+
+    if not api_key:
+        raise HTTPException(500, "AI key is not configured")
+
+    if not data.project_name.strip():
+        raise HTTPException(400, "Project name cannot be empty.")
+
+    if not data.project_type.strip():
+        raise HTTPException(400, "Project type cannot be empty.")
+
+    if not data.description.strip():
+        raise HTTPException(400, "Project description cannot be empty.")
+
+    if (
+        len(data.project_name) > 200
+        or len(data.project_type) > 100
+        or len(data.description) > 10000
+    ):
+        raise HTTPException(413, "Project information is too long.")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are NEXTGEN SMART ANALYSIS. "
+                    "Analyze projects carefully. "
+                    "Identify strengths, weaknesses, possible "
+                    "problems, improvements and testing steps. "
+                    "Give a quality score from 1 to 100. "
+                    "Explain that the score is an AI estimate, "
+                    "not a verified test result. "
+                    "Never claim that you physically tested "
+                    "or executed a project when you did not. "
+                    "Understand Cebuano and English."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Project: {data.project_name}\n"
+                    f"Type: {data.project_type}\n"
+                    f"Description: {data.description}\n\n"
+                    "Provide these sections:\n"
+                    "1. Overall analysis\n"
+                    "2. Strengths\n"
+                    "3. Problems and weaknesses\n"
+                    "4. Estimated quality score (1-100)\n"
+                    "5. Suggested improvements\n"
+                    "6. Testing plan\n"
+                    "7. Final recommendations"
+                )
+            }
+        ],
+        "temperature": 0.4,
+        "max_completion_tokens": 2000
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            response = await client.post(
+                GROQ_URL,
+                headers=headers,
+                json=payload
+            )
+
+        if response.status_code != 200:
+            raise HTTPException(
+                502,
+                f"Smart Analysis error {response.status_code}: "
+                f"{response.text[:300]}"
+            )
+
+        result = response.json()
+
+        return {
+            "success": True,
+            "analysis": result["choices"][0]["message"]["content"],
+            "project_name": data.project_name,
             "model": MODEL
         }
 

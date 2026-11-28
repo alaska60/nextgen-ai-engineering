@@ -7,6 +7,7 @@ import operator
 import zipfile
 import tempfile
 import shutil
+import re
 
 from pathlib import Path
 from io import BytesIO, StringIO
@@ -25,7 +26,6 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from starlette.background import BackgroundTask
-
 from pydantic import BaseModel, Field
 
 from pypdf import PdfReader
@@ -35,16 +35,13 @@ from pptx import Presentation
 
 
 # =========================================
-# NEXTGEN AI BRAIN 4.0
+# NEXTGEN AI BRAIN 5.0
 # =========================================
 
 APP_NAME = "NEXTGEN AI BRAIN"
+VERSION = "5.0.0"
 
-VERSION = "4.0.0"
-
-GROQ_URL = (
-    "https://api.groq.com/openai/v1/chat/completions"
-)
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 MODEL = os.getenv(
     "AI_MODEL",
@@ -63,10 +60,7 @@ VISION_MODEL = os.getenv(
 
 app = FastAPI(
     title=APP_NAME,
-    description=(
-        "NEXTGEN AI CREATOR, AI Engineering "
-        "and Godot Game Development Engine."
-    ),
+    description="NEXTGEN AI CREATOR and Game Development Engine.",
     version=VERSION
 )
 
@@ -102,23 +96,14 @@ class PluginRequest(BaseModel):
 
 class GameCreateRequest(BaseModel):
     game_name: str = "My Godot Game"
-
     engine: str = "Godot 4"
-
     task: str = "create_project"
-
     feature_request: str = ""
-
     feature: Optional[str] = None
-
     request: Optional[str] = None
-
     existing_code: Optional[str] = None
-
     code: Optional[str] = None
-
     platform: str = "Android"
-
     model: Optional[str] = None
 
 
@@ -157,16 +142,12 @@ async def ask_ai(
     }
 
     if selected_model.startswith("openai/gpt-oss"):
-
         payload["include_reasoning"] = False
-
         payload["reasoning_effort"] = "low"
 
     try:
 
-        async with httpx.AsyncClient(
-            timeout=180
-        ) as client:
+        async with httpx.AsyncClient(timeout=180) as client:
 
             response = await client.post(
                 GROQ_URL,
@@ -175,35 +156,28 @@ async def ask_ai(
             )
 
         if response.status_code != 200:
-
             raise HTTPException(
                 status_code=502,
                 detail=(
-                    f"AI provider error "
-                    f"{response.status_code}: "
+                    f"AI provider error {response.status_code}: "
                     f"{response.text[:500]}"
                 )
             )
 
         result = response.json()
-
         choices = result.get("choices", [])
 
         if not choices:
-
             raise HTTPException(
                 status_code=502,
                 detail="AI provider returned no choices."
             )
 
         choice = choices[0]
-
         message = choice.get("message") or {}
-
         answer = message.get("content")
 
         if isinstance(answer, list):
-
             answer = "\n".join(
                 item.get("text", "")
                 for item in answer
@@ -211,13 +185,9 @@ async def ask_ai(
             )
 
         if not isinstance(answer, str) or not answer.strip():
-
             raise HTTPException(
                 status_code=502,
-                detail=(
-                    "AI returned an empty final answer. "
-                    f"Finish reason: {choice.get('finish_reason')}"
-                )
+                detail="AI returned an empty answer."
             )
 
         return answer.strip()
@@ -226,21 +196,18 @@ async def ask_ai(
         raise
 
     except httpx.TimeoutException:
-
         raise HTTPException(
             status_code=504,
             detail="AI provider timed out."
         )
 
     except httpx.RequestError:
-
         raise HTTPException(
             status_code=503,
             detail="Could not connect to AI provider."
         )
 
     except (ValueError, KeyError, TypeError):
-
         raise HTTPException(
             status_code=502,
             detail="AI provider returned an invalid response."
@@ -248,7 +215,7 @@ async def ask_ai(
 
 
 # =========================================
-# HOME
+# HOME AND STATUS
 # =========================================
 
 @app.get("/")
@@ -267,9 +234,7 @@ async def health():
 
     return {
         "status": "healthy",
-        "ai_configured": bool(
-            os.getenv("GROQ_API_KEY")
-        ),
+        "ai_configured": bool(os.getenv("GROQ_API_KEY")),
         "model": MODEL
     }
 
@@ -334,15 +299,12 @@ async def chat(request: ChatRequest):
 async def analyze_image(
     file: Optional[UploadFile] = File(None),
     image: Optional[UploadFile] = File(None),
-    prompt: str = Form(
-        "Describe and analyze this image."
-    )
+    prompt: str = Form("Describe and analyze this image.")
 ):
 
     uploaded = file or image
 
     if not uploaded:
-
         raise HTTPException(
             status_code=400,
             detail="Please upload an image."
@@ -351,14 +313,12 @@ async def analyze_image(
     content = await uploaded.read()
 
     if not content:
-
         raise HTTPException(
             status_code=400,
             detail="Image is empty."
         )
 
     if len(content) > 10 * 1024 * 1024:
-
         raise HTTPException(
             status_code=413,
             detail="Maximum image size is 10 MB."
@@ -367,19 +327,14 @@ async def analyze_image(
     mime_type = uploaded.content_type or "image/jpeg"
 
     if not mime_type.startswith("image/"):
-
         raise HTTPException(
             status_code=400,
             detail="Uploaded file must be an image."
         )
 
-    encoded = base64.b64encode(
-        content
-    ).decode("utf-8")
+    encoded = base64.b64encode(content).decode("utf-8")
 
-    image_url = (
-        f"data:{mime_type};base64,{encoded}"
-    )
+    image_url = f"data:{mime_type};base64,{encoded}"
 
     answer = await ask_ai(
         messages=[
@@ -423,17 +378,11 @@ def extract_file_text(filename, content):
     try:
 
         if extension == "txt":
-
-            return content.decode(
-                "utf-8",
-                errors="replace"
-            )
+            return content.decode("utf-8", errors="replace")
 
         elif extension == "pdf":
 
-            reader = PdfReader(
-                BytesIO(content)
-            )
+            reader = PdfReader(BytesIO(content))
 
             return "\n".join(
                 page.extract_text() or ""
@@ -442,9 +391,7 @@ def extract_file_text(filename, content):
 
         elif extension == "docx":
 
-            document = Document(
-                BytesIO(content)
-            )
+            document = Document(BytesIO(content))
 
             return "\n".join(
                 paragraph.text
@@ -462,13 +409,9 @@ def extract_file_text(filename, content):
 
             for sheet in workbook.worksheets:
 
-                output.append(
-                    f"Sheet: {sheet.title}"
-                )
+                output.append(f"Sheet: {sheet.title}")
 
-                for row in sheet.iter_rows(
-                    values_only=True
-                ):
+                for row in sheet.iter_rows(values_only=True):
 
                     output.append(
                         " | ".join(
@@ -482,20 +425,15 @@ def extract_file_text(filename, content):
 
         elif extension == "pptx":
 
-            presentation = Presentation(
-                BytesIO(content)
-            )
-
+            presentation = Presentation(BytesIO(content))
             output = []
 
-            for slide_number, slide in enumerate(
+            for number, slide in enumerate(
                 presentation.slides,
                 start=1
             ):
 
-                output.append(
-                    f"Slide {slide_number}"
-                )
+                output.append(f"Slide {number}")
 
                 for shape in slide.shapes:
 
@@ -511,9 +449,7 @@ def extract_file_text(filename, content):
                 errors="replace"
             )
 
-            reader = csv.reader(
-                StringIO(text_content)
-            )
+            reader = csv.reader(StringIO(text_content))
 
             return "\n".join(
                 " | ".join(row)
@@ -543,21 +479,17 @@ def extract_file_text(filename, content):
 # =========================================
 
 @app.post("/api/analyze-file")
-async def analyze_file(
-    file: UploadFile = File(...)
-):
+async def analyze_file(file: UploadFile = File(...)):
 
     content = await file.read()
 
     if not content:
-
         raise HTTPException(
             status_code=400,
             detail="Uploaded file is empty."
         )
 
     if len(content) > 10 * 1024 * 1024:
-
         raise HTTPException(
             status_code=413,
             detail="Maximum file size is 10 MB."
@@ -569,7 +501,6 @@ async def analyze_file(
     )
 
     if not extracted_text.strip():
-
         raise HTTPException(
             status_code=400,
             detail="No readable text found."
@@ -608,18 +539,11 @@ async def analyze_file(
 # =========================================
 
 @app.post("/api/smart-analysis")
-async def smart_analysis(
-    request: SmartAnalysisRequest
-):
+async def smart_analysis(request: SmartAnalysisRequest):
 
-    content = (
-        request.content
-        or request.message
-        or ""
-    )
+    content = request.content or request.message or ""
 
     if not content.strip():
-
         raise HTTPException(
             status_code=400,
             detail="Please enter something to analyze."
@@ -664,18 +588,9 @@ async def get_plugins():
     return {
         "success": True,
         "plugins": [
-            {
-                "id": "calculator",
-                "name": "Calculator"
-            },
-            {
-                "id": "text_analyzer",
-                "name": "Text Analyzer"
-            },
-            {
-                "id": "json_formatter",
-                "name": "JSON Formatter"
-            }
+            {"id": "calculator", "name": "Calculator"},
+            {"id": "text_analyzer", "name": "Text Analyzer"},
+            {"id": "json_formatter", "name": "JSON Formatter"}
         ]
     }
 
@@ -699,10 +614,7 @@ ALLOWED_OPERATORS = {
 
 def safe_calculate(expression):
 
-    tree = ast.parse(
-        expression,
-        mode="eval"
-    )
+    tree = ast.parse(expression, mode="eval")
 
     def evaluate(node):
 
@@ -715,9 +627,7 @@ def safe_calculate(expression):
 
         if isinstance(node, ast.BinOp):
 
-            operation = ALLOWED_OPERATORS.get(
-                type(node.op)
-            )
+            operation = ALLOWED_OPERATORS.get(type(node.op))
 
             if not operation:
                 raise ValueError("Operator not allowed.")
@@ -725,25 +635,19 @@ def safe_calculate(expression):
             left = evaluate(node.left)
             right = evaluate(node.right)
 
-            if isinstance(node.op, ast.Pow):
-
-                if abs(right) > 100:
-                    raise ValueError("Exponent too large.")
+            if isinstance(node.op, ast.Pow) and abs(right) > 100:
+                raise ValueError("Exponent too large.")
 
             return operation(left, right)
 
         if isinstance(node, ast.UnaryOp):
 
-            operation = ALLOWED_OPERATORS.get(
-                type(node.op)
-            )
+            operation = ALLOWED_OPERATORS.get(type(node.op))
 
             if not operation:
                 raise ValueError("Operator not allowed.")
 
-            return operation(
-                evaluate(node.operand)
-            )
+            return operation(evaluate(node.operand))
 
         raise ValueError("Invalid expression.")
 
@@ -769,9 +673,7 @@ async def run_plugin(request: PluginRequest):
 
         try:
 
-            result = safe_calculate(
-                str(data)
-            )
+            result = safe_calculate(str(data))
 
             return {
                 "success": True,
@@ -883,6 +785,8 @@ Rules:
 9. Do not reference nonexistent assets.
 10. Make code organized and understandable.
 
+Support different game genres, not only survival games.
+
 For BLOCK WORLD SURVIVAL preserve:
 - Voxel/block-style graphics
 - Player customization
@@ -954,10 +858,7 @@ Label every filename clearly.
         "project_output": answer,
         "model": request.model or MODEL,
         "tested": False,
-        "note": (
-            "Generated code must still be opened "
-            "and tested in Godot 4."
-        )
+        "note": "Generated code must still be opened and tested in Godot 4."
     }
 
 
@@ -982,7 +883,6 @@ def parse_project_json(answer):
         cleaned = "\n".join(lines)
 
     try:
-
         return json.loads(cleaned)
 
     except json.JSONDecodeError:
@@ -990,24 +890,24 @@ def parse_project_json(answer):
         start = cleaned.find("{")
         end = cleaned.rfind("}")
 
-        if start == -1 or end == -1 or end <= start:
+        if start < 0 or end <= start:
             raise ValueError("No JSON object found.")
 
-        return json.loads(
-            cleaned[start:end + 1]
-        )
+        return json.loads(cleaned[start:end + 1])
 
 
 # =========================================
-# GODOT 4 ZIP GENERATOR
+# GODOT 4 ADVANCED ZIP GENERATOR
 # =========================================
 
 ZIP_SYSTEM_PROMPT = """
 You are NEXTGEN AI GODOT 4 PROJECT GENERATOR.
 
-Return ONLY a valid JSON object.
+You create downloadable Godot 4 projects.
 
-Required format:
+Return ONLY one valid JSON object.
+
+REQUIRED FORMAT:
 
 {
   "files": {
@@ -1023,27 +923,30 @@ Required format:
   }
 }
 
-PROJECT REQUIREMENTS:
+REQUIREMENTS:
 
-- Godot 4 only.
-- Valid GDScript 2.0.
-- Create a playable 2D starter game.
-- Use built-in shapes and drawing.
-- Do not require external assets.
-- Create a working main scene.
-- Include player movement.
-- Include a simple generated grass world.
-- Include Android touch buttons.
-- Include inventory and hotbar.
-- Include basic animal wandering and eating behavior.
-- Make all scripts compatible with each other.
-- Include project setup instructions.
-- Include testing instructions.
-- Do not claim the project has been tested.
-- Avoid missing node references.
-- Do not use Godot 3 syntax.
+1. Godot 4 only.
+2. Use valid GDScript 2.0.
+3. Create a playable 2D starter game.
+4. Include a valid project.godot.
+5. Configure the main scene correctly.
+6. Include player movement.
+7. Include generated grass and dirt terrain.
+8. Include Android touch controls.
+9. Include inventory and hotbar.
+10. Include basic animal wandering and eating behavior.
+11. Use built-in shapes and drawing.
+12. Do not require external assets.
+13. Make scripts compatible with each other.
+14. Use correct node paths.
+15. Avoid Godot 3 syntax.
+16. Include README and setup instructions.
+17. Include testing instructions.
+18. Do not claim that the project was tested.
+19. Do not include files outside the project.
+20. Return complete file contents.
 
-Return all required files in the JSON files object.
+Make the project practical and organized.
 """
 
 
@@ -1052,12 +955,11 @@ async def create_game_zip(request: GameCreateRequest):
 
     game_name = request.game_name or "NEXTGEN_GAME"
 
-    safe_name = "".join(
-        character
-        for character in game_name
-        if character.isalnum()
-        or character in ("-", "_")
-    ).strip()
+    safe_name = re.sub(
+        r"[^A-Za-z0-9_-]",
+        "_",
+        game_name
+    ).strip("_")[:60]
 
     if not safe_name:
         safe_name = "NEXTGEN_GAME"
@@ -1066,7 +968,7 @@ async def create_game_zip(request: GameCreateRequest):
         request.feature_request
         or request.feature
         or request.request
-        or "Create a complete starter survival game."
+        or "Create a playable survival game."
     )
 
     answer = await ask_ai(
@@ -1113,7 +1015,7 @@ Return valid JSON only.
             status_code=502,
             detail=(
                 "AI did not return a valid project file list. "
-                f"Please try again. Details: {str(error)}"
+                f"Details: {str(error)}"
             )
         )
 
@@ -1146,19 +1048,16 @@ Return valid JSON only.
         )
 
     if len(files) > 60:
-
         raise HTTPException(
             status_code=502,
             detail="AI generated too many files."
         )
 
     temp_dir = tempfile.mkdtemp(
-        prefix="nextgen_game_"
+        prefix="nextgen_godot_"
     )
 
-    project_dir = (
-        Path(temp_dir) / safe_name
-    )
+    project_dir = Path(temp_dir) / safe_name
 
     project_dir.mkdir(
         parents=True,
@@ -1172,27 +1071,34 @@ Return valid JSON only.
         for filename, content in files.items():
 
             if not isinstance(filename, str):
-                continue
+                raise ValueError("Invalid filename.")
 
             if not isinstance(content, str):
-                continue
+                raise ValueError(
+                    f"Invalid file content: {filename}"
+                )
 
             relative_path = Path(filename)
 
             if (
                 relative_path.is_absolute()
                 or ".." in relative_path.parts
+                or not relative_path.parts
             ):
+                raise ValueError(
+                    f"Unsafe file path: {filename}"
+                )
+
+            if relative_path.parts[0] == ".git":
                 continue
 
             total_size += len(
                 content.encode("utf-8")
             )
 
-            if total_size > 2 * 1024 * 1024:
-
+            if total_size > 3 * 1024 * 1024:
                 raise ValueError(
-                    "Generated project exceeds 2 MB."
+                    "Generated project exceeds 3 MB."
                 )
 
             target = project_dir / relative_path
@@ -1207,9 +1113,30 @@ Return valid JSON only.
                 encoding="utf-8"
             )
 
-        zip_path = (
-            Path(temp_dir) / f"{safe_name}.zip"
-        )
+        for filename in required_files:
+
+            target = project_dir / filename
+
+            if not target.is_file():
+                raise ValueError(
+                    f"Required file missing: {filename}"
+                )
+
+        project_config = (
+            project_dir / "project.godot"
+        ).read_text(encoding="utf-8")
+
+        if "config_version=5" not in project_config:
+            raise ValueError(
+                "Invalid Godot 4 project configuration."
+            )
+
+        if "run/main_scene" not in project_config:
+            raise ValueError(
+                "Main scene is not configured."
+            )
+
+        zip_path = Path(temp_dir) / f"{safe_name}.zip"
 
         with zipfile.ZipFile(
             zip_path,
@@ -1226,14 +1153,17 @@ Return valid JSON only.
                         file_path.relative_to(temp_dir)
                     )
 
-        if (
-            not zip_path.exists()
-            or zip_path.stat().st_size == 0
-        ):
+        with zipfile.ZipFile(zip_path, "r") as archive:
 
-            raise ValueError(
-                "ZIP file creation failed."
-            )
+            bad_file = archive.testzip()
+
+            if bad_file:
+                raise ValueError(
+                    f"ZIP verification failed: {bad_file}"
+                )
+
+        if not zip_path.exists() or zip_path.stat().st_size == 0:
+            raise ValueError("ZIP file creation failed.")
 
         return FileResponse(
             path=str(zip_path),
@@ -1255,12 +1185,10 @@ Return valid JSON only.
 
         raise HTTPException(
             status_code=500,
-            detail=(
-                f"Could not create project ZIP: {str(error)}"
-            )
+            detail=f"ZIP generation failed: {str(error)}"
         )
 
 
 # =========================================
-# END
+# END NEXTGEN AI BRAIN 5.0
 # =========================================
